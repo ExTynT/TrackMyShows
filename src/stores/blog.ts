@@ -5,6 +5,7 @@ interface BlogPost {
   id: number
   title: string
   content: string
+  full_content: string
   author: string
   date: string
   image_url?: string
@@ -15,6 +16,7 @@ interface BlogPost {
 export const useBlogStore = defineStore('blog', {
   state: () => ({
     posts: [] as BlogPost[],
+    currentPost: null as BlogPost | null,
     loading: false,
     error: null as string | null,
   }),
@@ -37,6 +39,23 @@ export const useBlogStore = defineStore('blog', {
         this.posts = data
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to fetch posts'
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchPostDetail(id: number) {
+      this.loading = true
+      this.error = null
+      try {
+        const { data, error } = await supabase.from('blog_posts').select('*').eq('id', id).single()
+
+        if (error) throw error
+        this.currentPost = data
+      } catch (err) {
+        console.error('Blog detail error:', err)
+        this.error = 'Failed to fetch blog post'
+        this.currentPost = null
       } finally {
         this.loading = false
       }

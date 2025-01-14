@@ -8,7 +8,12 @@
       class="loader"
     ></v-progress-circular>
     <div v-else class="blogs-grid">
-      <div v-for="blog in blogStore.blogs" :key="blog.id" class="blog-card">
+      <div
+        v-for="blog in blogStore.blogs"
+        :key="blog.id"
+        class="blog-card"
+        @click="router.push({ name: 'blog-detail', params: { id: blog.id } })"
+      >
         <div class="blog-header">
           <div class="blog-info">
             <h3 class="blog-title">{{ blog.title }}</h3>
@@ -22,7 +27,12 @@
         </div>
       </div>
 
-      <div v-for="review in blogStore.reviews" :key="review.id" class="blog-card review-card">
+      <div
+        v-for="review in blogStore.reviews"
+        :key="review.id"
+        class="blog-card review-card"
+        @click="router.push({ name: 'blog-detail', params: { id: review.id } })"
+      >
         <div class="blog-header">
           <div class="blog-info">
             <h3 class="blog-title">{{ review.title }}</h3>
@@ -43,7 +53,9 @@
 <script setup lang="ts">
 import { useBlogStore } from '@/stores/blog'
 import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const blogStore = useBlogStore()
 
 onMounted(() => {
