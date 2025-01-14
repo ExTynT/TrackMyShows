@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
-import MediaDetailView from '@/views/MediaDetailView.vue'
+import HomeView from '../views/HomeView.vue'
+import NewsDetailView from '../views/NewsDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,9 +11,9 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/:type(anime|manga)/:id',
-      name: 'media-detail',
-      component: MediaDetailView,
+      path: '/news/:slug',
+      name: 'news-detail',
+      component: NewsDetailView,
     },
   ],
 })
