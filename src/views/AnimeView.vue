@@ -1,273 +1,206 @@
 <template>
   <div class="anime-view">
     <!-- Hero Section -->
-    <AnimeHeroCarousel />
+    <MediaHeroCarousel
+      type="anime"
+      :slides="carouselSlides"
+      :loading="carouselLoading"
+      @navigate="navigateToAnime"
+    />
 
     <!-- Currently Airing Section -->
-    <section class="py-8">
-      <v-container>
-        <h2 class="text-h4 font-weight-bold mb-6">Currently Airing</h2>
-        <v-row>
-          <v-col v-for="anime in animeStore.airingAnime" :key="anime.id" cols="12" sm="6" md="3">
-            <v-hover v-slot="{ isHovering, props }">
-              <v-card
-                :elevation="isHovering ? 8 : 2"
-                :class="{ 'on-hover': isHovering }"
-                v-bind="props"
-                @click="router.push('/anime/' + anime.id)"
-              >
-                <v-img :src="anime.image_url" height="350" cover class="align-end">
-                  <v-card-title class="text-white bg-black bg-opacity-50">
-                    {{ anime.title }}
-                  </v-card-title>
-                </v-img>
-                <v-card-text>
-                  <div class="d-flex align-center mb-2">
-                    <v-rating
-                      v-model="anime.rating"
-                      color="amber"
-                      density="compact"
-                      half-increments
-                      readonly
-                      size="small"
-                    ></v-rating>
-                    <span class="text-grey-darken-2 ms-2">{{ anime.rating }}/5</span>
-                  </div>
-                  <div class="d-flex flex-wrap gap-1">
-                    <v-chip
-                      v-for="genreRelation in anime.genres"
-                      :key="genreRelation.genres.id"
-                      size="small"
-                      class="me-1 mb-1"
-                    >
-                      {{ genreRelation.genres.name }}
-                    </v-chip>
-                  </div>
-                </v-card-text>
-              </v-card>
-            </v-hover>
-          </v-col>
-        </v-row>
-      </v-container>
-    </section>
+    <MediaCurrentlyAiring
+      type="anime"
+      :media-list="animeStore.animeList"
+      @navigate="navigateToAnime"
+    />
+
+    <!-- Upcoming Section -->
+    <MediaUpcoming
+      type="anime"
+      :media-list="animeStore.animeList"
+      @navigate="navigateToAnime"
+      @track="trackAnime"
+    />
 
     <!-- Top Rated Section -->
     <section class="py-8 bg-grey-darken-4">
       <v-container>
         <h2 class="text-h4 font-weight-bold mb-6">Top Rated</h2>
         <v-row>
-          <v-col v-for="(anime, index) in animeStore.topRatedAnime" :key="anime.id" cols="12">
-            <v-hover v-slot="{ isHovering, props }">
-              <v-card
-                :elevation="isHovering ? 8 : 2"
-                :class="{ 'on-hover': isHovering }"
-                v-bind="props"
-                @click="router.push('/anime/' + anime.id)"
-              >
-                <div class="d-flex">
-                  <div class="rank-badge">#{{ index + 1 }}</div>
-                  <v-img
-                    :src="anime.image_url"
-                    height="200"
-                    width="200"
-                    cover
-                    class="top-rated-image"
-                  ></v-img>
-                  <div class="pa-4 flex-grow-1">
-                    <div class="d-flex justify-space-between align-center">
-                      <h3 class="text-h5 font-weight-bold">{{ anime.title }}</h3>
-                      <div class="d-flex align-center">
-                        <v-icon color="amber" class="me-1">mdi-star</v-icon>
-                        <span class="text-h6">{{ anime.rating }}</span>
-                      </div>
-                    </div>
-                    <p class="mt-2 text-grey">{{ anime.synopsis }}</p>
-                    <div class="mt-2">
-                      <v-chip
-                        v-for="studioRelation in anime.studios"
-                        :key="studioRelation.studios.id"
-                        class="me-2 studio-chip"
-                        color="primary"
-                        variant="outlined"
-                        size="small"
-                      >
-                        <v-img
-                          :src="studioRelation.studios.logo_url"
-                          height="16"
-                          width="32"
-                          class="me-1"
-                          contain
-                        ></v-img>
-                      </v-chip>
-                    </div>
-                  </div>
-                </div>
-              </v-card>
-            </v-hover>
+          <v-col v-for="(anime, index) in topRatedAnime" :key="anime.id" cols="12">
+            <TopRatedMediaCard
+              type="anime"
+              :media="anime"
+              :rank="index + 1"
+              @click="navigateToAnime(anime.id)"
+            />
           </v-col>
         </v-row>
       </v-container>
     </section>
 
-    <!-- Upcoming Releases -->
+    <!-- Reviews Section -->
+    <MediaReviewsSection type="anime" />
+
+    <!-- Media Statistics Section -->
     <section class="py-8">
       <v-container>
-        <h2 class="text-h4 font-weight-bold mb-6">Upcoming Releases</h2>
-        <v-row>
-          <v-col v-for="anime in animeStore.upcomingAnime" :key="anime.id" cols="12" sm="6" lg="4">
-            <v-card @click="router.push('/anime/' + anime.id)" class="upcoming-card">
-              <v-img :src="anime.image_url" height="250" cover class="align-end">
-                <div class="upcoming-overlay">
-                  <div class="pa-4">
-                    <h3 class="text-h5 font-weight-bold mb-2">{{ anime.title }}</h3>
-                    <p class="mb-2">{{ anime.season }} {{ anime.year }}</p>
-                    <div class="d-flex flex-wrap gap-1">
-                      <v-chip
-                        v-for="genreRelation in anime.genres"
-                        :key="genreRelation.genres.id"
-                        size="small"
-                        class="me-1 mb-1"
-                      >
-                        {{ genreRelation.genres.name }}
-                      </v-chip>
-                    </div>
-                  </div>
-                </div>
-              </v-img>
-            </v-card>
-          </v-col>
-        </v-row>
+        <h2 class="text-h4 font-weight-bold mb-6">Media Statistics</h2>
+        <MediaStatistics
+          type="anime"
+          :total-items="totalAnime"
+          :total-episodes-or-chapters="totalEpisodesWatched"
+          :average-rating="averageRating"
+          :completion-rate="completionRate"
+        />
       </v-container>
     </section>
-
-    <!-- Browse by Genre -->
-    <AnimeReviewsSection title="Latest Reviews" />
   </div>
 </template>
 
-<script setup lang="ts">
-import { onMounted } from 'vue'
+<script lang="ts">
+import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAnimeStore } from '@/stores/animeStore'
-import AnimeHeroCarousel from '@/components/AnimeHeroCarousel.vue'
-import AnimeReviewsSection from '@/components/AnimeReviewsSection.vue'
+import MediaHeroCarousel from '@/components/common/MediaHeroCarousel.vue'
+import TopRatedMediaCard from '@/components/common/TopRatedMediaCard.vue'
+import MediaReviewsSection from '@/components/common/MediaReviewsSection.vue'
+import MediaCurrentlyAiring from '@/components/common/MediaCurrentlyAiring.vue'
+import MediaStatistics from '@/components/common/MediaStatistics.vue'
+import MediaUpcoming from '@/components/common/MediaUpcoming.vue'
+import type { CarouselSlide } from '@/types/carousel'
 
-const router = useRouter()
-const animeStore = useAnimeStore()
+export default defineComponent({
+  name: 'AnimeView',
 
-onMounted(async () => {
-  if (animeStore.animeList.length === 0) {
-    await animeStore.fetchAnimeList()
-  }
-  await animeStore.fetchGenres()
+  components: {
+    MediaHeroCarousel,
+    TopRatedMediaCard,
+    MediaReviewsSection,
+    MediaCurrentlyAiring,
+    MediaStatistics,
+    MediaUpcoming,
+  },
+
+  data() {
+    return {
+      carouselLoading: true,
+      carouselSlides: [] as CarouselSlide[],
+    }
+  },
+
+  setup() {
+    const animeStore = useAnimeStore()
+    const router = useRouter()
+    return { animeStore, router }
+  },
+
+  computed: {
+    topRatedAnime() {
+      return [...this.animeStore.animeList]
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 10)
+    },
+    totalAnime() {
+      return this.animeStore.animeList.length
+    },
+    totalEpisodesWatched() {
+      return this.animeStore.animeList.reduce((total, anime) => total + (anime.episodes || 0), 0)
+    },
+    averageRating() {
+      const animeWithRatings = this.animeStore.animeList.filter((anime) => anime.rating)
+      if (!animeWithRatings.length) return 0
+      return (
+        animeWithRatings.reduce((sum, anime) => sum + (anime.rating || 0), 0) /
+        animeWithRatings.length
+      )
+    },
+    completionRate() {
+      const completed = this.animeStore.animeList.filter(
+        (anime) => anime.status === 'finished',
+      ).length
+      return (completed / this.totalAnime) * 100
+    },
+  },
+
+  methods: {
+    navigateToAnime(animeId: number) {
+      this.router.push(`/anime/${animeId}`)
+    },
+
+    trackAnime(animeId: number) {
+      // TODO: Implement tracking functionality
+      console.log('Tracking anime:', animeId)
+    },
+
+    async prepareCarouselSlides() {
+      if (this.animeStore.animeList.length === 0) {
+        await this.animeStore.fetchAnimeList()
+      }
+
+      // Find the IDs of Demon Slayer, Jujutsu Kaisen, and One Piece
+      const demonSlayerId =
+        this.animeStore.animeList.find(
+          (a) =>
+            a.title.toLowerCase().includes('demon slayer') ||
+            a.title.toLowerCase().includes('kimetsu no yaiba'),
+        )?.id || 1
+
+      const jjkId =
+        this.animeStore.animeList.find((a) => a.title.toLowerCase().includes('jujutsu kaisen'))
+          ?.id || 2
+
+      const onePieceId =
+        this.animeStore.animeList.find((a) => a.title.toLowerCase().includes('one piece'))?.id || 3
+
+      this.carouselSlides = [
+        {
+          id: demonSlayerId,
+          title: 'Demon Slayer: Kimetsu no Yaiba',
+          description:
+            'Experience the breathtaking journey of Tanjiro Kamado, a young demon slayer who seeks to turn his sister back to human and avenge his family. With stunning animation and intense action, this series redefines the boundaries of anime storytelling.',
+          rating: 4.8,
+          cover_image_url:
+            'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/DS.avif?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvRFMuYXZpZiIsImlhdCI6MTczNjg2NDk2MywiZXhwIjoxNzY4NDAwOTYzfQ.H7RKAOjXKq5Q_-z15GjzgGvtufcxO2IFYwoJjELifkE&t=2025-01-14T14%3A29%3A23.359Z',
+        },
+        {
+          id: jjkId,
+          title: 'Jujutsu Kaisen',
+          description:
+            'Dive into a world where curses run rampant and sorcerers must master the art of Cursed Energy. Follow Yuji Itadori as he joins Tokyo Metropolitan Curse Technical School and faces supernatural threats that could destroy humanity.',
+          rating: 4.9,
+          cover_image_url:
+            'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/JJK.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvSkpLLndlYnAiLCJpYXQiOjE3MzY4NjQ5NzgsImV4cCI6MTc2ODQwMDk3OH0.D4n4nAbYEVjXczsanKOhIxnt-tneZh-Vbbc5Jn3SQUc&t=2025-01-14T14%3A29%3A37.857Z',
+        },
+        {
+          id: onePieceId,
+          title: 'One Piece',
+          description:
+            'Join Monkey D. Luffy and his diverse crew on their epic quest to find the legendary One Piece treasure. This long-running series combines adventure, friendship, and spectacular battles in a unique world of pirates and mystery.',
+          rating: 4.7,
+          cover_image_url:
+            'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/OP.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvT1Aud2VicCIsImlhdCI6MTczNjg2NDk5MywiZXhwIjoxNzY4NDAwOTkzfQ.bmCWGP0594Mk_BdqmVArZdVUy-RcpZSmvDxR-plkFAU&t=2025-01-14T14%3A29%3A53.506Z',
+        },
+      ]
+      this.carouselLoading = false
+    },
+  },
+
+  async mounted() {
+    await this.prepareCarouselSlides()
+    if (this.animeStore.animeList.length === 0) {
+      await this.animeStore.fetchAnimeList()
+    }
+  },
 })
 </script>
 
 <style scoped>
-.hero-section {
-  position: relative;
-  min-height: 500px;
-  display: flex;
-  align-items: center;
-}
-
-.hero-content {
-  background: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.6) 60%,
-    transparent 100%
-  );
-  padding: 3rem;
-  max-width: 800px;
+.anime-view {
+  min-height: 100vh;
+  background: #121212;
   color: white;
-  border-radius: 8px;
-  backdrop-filter: blur(8px);
-}
-
-.on-hover {
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.on-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.rank-badge {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: var(--v-primary-base);
-  color: white;
-  padding: 0.5rem 1rem;
-  font-weight: bold;
-  border-bottom-right-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-}
-
-.upcoming-card {
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-  border-radius: 12px;
-}
-
-.upcoming-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.upcoming-overlay {
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.95) 0%,
-    rgba(0, 0, 0, 0.7) 50%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  color: white;
-  padding: 2rem 1.5rem;
-  transition: transform 0.3s ease;
-}
-
-.upcoming-card:hover .upcoming-overlay {
-  transform: translateY(-8px);
-}
-
-.genre-card {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.genre-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-}
-
-.top-rated-image {
-  object-fit: cover;
-  object-position: center;
-  min-width: 200px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.d-flex {
-  gap: 20px;
 }
 
 section {
@@ -300,26 +233,5 @@ section::before {
   height: 3px;
   background: var(--v-primary-base);
   border-radius: 2px;
-}
-
-v-chip {
-  transition: all 0.2s ease;
-}
-
-v-chip:hover {
-  transform: translateY(-2px);
-}
-
-.studio-chip {
-  height: 24px !important;
-  padding: 0 8px;
-}
-
-.studio-chip .v-img {
-  opacity: 0.9;
-}
-
-.studio-chip:hover .v-img {
-  opacity: 1;
 }
 </style>

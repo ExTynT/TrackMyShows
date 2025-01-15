@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabase'
 
-interface BlogPost {
+export interface BlogPost {
   id: number
   title: string
   content: string

@@ -66,26 +66,36 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from 'vue'
 import { useNewsStore } from '@/stores/news'
-import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
-const route = useRoute()
-const newsStore = useNewsStore()
+export default defineComponent({
+  name: 'NewsDetailView',
 
-const formatDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }
-  return new Date(dateString).toLocaleDateString('en-US', options)
-}
+  data() {
+    return {
+      route: useRoute(),
+      newsStore: useNewsStore(),
+    }
+  },
 
-onMounted(async () => {
-  const slug = route.params.slug as string
-  await newsStore.fetchNewsDetail(slug)
+  methods: {
+    formatDate(dateString: string): string {
+      const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }
+      return new Date(dateString).toLocaleDateString('en-US', options)
+    },
+  },
+
+  async mounted() {
+    const slug = this.route.params.slug as string
+    await this.newsStore.fetchNewsDetail(slug)
+  },
 })
 </script>
 

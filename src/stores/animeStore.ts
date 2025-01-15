@@ -1,7 +1,42 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { supabase } from '../lib/supabase'
-import type { Anime, Genre, Studio, UserAnimeListItem } from '@/types/anime'
+import type { Genre, Studio, UserAnimeListItem, AnimeStatus, AnimeSeason } from '@/types/anime'
+
+export interface Anime {
+  id: number
+  title: string
+  japanese_title?: string
+  synopsis?: string
+  image_url?: string
+  cover_image_url?: string
+  episodes: number
+  status: AnimeStatus
+  rating?: number
+  season?: AnimeSeason
+  year?: number
+  genres?: Array<{
+    genres: {
+      id: number
+      name: string
+    }
+  }>
+  studios?: Array<{
+    studios: {
+      id: number
+      name: string
+      logo_url?: string
+    }
+  }>
+  characters?: Array<{
+    id: number
+    name: string
+    japanese_name?: string
+    description?: string
+    anime_id: number
+  }>
+  popularity?: number
+}
 
 export const useAnimeStore = defineStore('anime', () => {
   // State

@@ -28,11 +28,11 @@
                   <v-btn
                     color="primary"
                     size="large"
-                    :to="'/anime/' + slide.id"
+                    :to="`/${type}/${slide.id}`"
                     class="text-capitalize"
-                    prepend-icon="mdi-play"
+                    :prepend-icon="actionIcon"
                   >
-                    Watch Now
+                    {{ actionText }}
                   </v-btn>
                 </v-col>
               </v-row>
@@ -44,58 +44,37 @@
   </section>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useAnimeStore } from '@/stores/animeStore'
+<script lang="ts">
+import { defineComponent } from 'vue'
+import type { CarouselSlide } from '@/types/carousel'
 
-interface CarouselSlide {
-  id: number
-  title: string
-  description: string
-  rating: number
-  cover_image_url: string
-}
+export default defineComponent({
+  name: 'MediaHeroCarousel',
 
-const animeStore = useAnimeStore()
-const loading = ref(true)
-const slides = ref<CarouselSlide[]>([])
-
-onMounted(async () => {
-  if (animeStore.animeList.length === 0) {
-    await animeStore.fetchAnimeList()
-  }
-
-  // Vyberieme top 3 anime pre carousel
-  slides.value = [
-    {
-      id: 1,
-      title: 'Demon Slayer: Kimetsu no Yaiba',
-      description:
-        'Experience the breathtaking journey of Tanjiro Kamado, a young demon slayer who seeks to turn his sister back to human and avenge his family. With stunning animation and intense action, this series redefines the boundaries of anime storytelling.',
-      rating: 4.8,
-      cover_image_url:
-        'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/DS.avif?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvRFMuYXZpZiIsImlhdCI6MTczNjg2NDk2MywiZXhwIjoxNzY4NDAwOTYzfQ.H7RKAOjXKq5Q_-z15GjzgGvtufcxO2IFYwoJjELifkE&t=2025-01-14T14%3A29%3A23.359Z',
+  props: {
+    type: {
+      type: String as () => 'anime' | 'manga',
+      required: true,
+      validator: (value: string) => ['anime', 'manga'].includes(value),
     },
-    {
-      id: 2,
-      title: 'Jujutsu Kaisen',
-      description:
-        'Dive into a world where curses run rampant and sorcerers must master the art of Cursed Energy. Follow Yuji Itadori as he joins Tokyo Metropolitan Curse Technical School and faces supernatural threats that could destroy humanity.',
-      rating: 4.9,
-      cover_image_url:
-        'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/JJK.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvSkpLLndlYnAiLCJpYXQiOjE3MzY4NjQ5NzgsImV4cCI6MTc2ODQwMDk3OH0.D4n4nAbYEVjXczsanKOhIxnt-tneZh-Vbbc5Jn3SQUc&t=2025-01-14T14%3A29%3A37.857Z',
+    slides: {
+      type: Array as () => CarouselSlide[],
+      required: true,
     },
-    {
-      id: 3,
-      title: 'One Piece',
-      description:
-        'Join Monkey D. Luffy and his diverse crew on their epic quest to find the legendary One Piece treasure. This long-running series combines adventure, friendship, and spectacular battles in a unique world of pirates and mystery.',
-      rating: 4.7,
-      cover_image_url:
-        'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/OP.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvT1Aud2VicCIsImlhdCI6MTczNjg2NDk5MywiZXhwIjoxNzY4NDAwOTkzfQ.bmCWGP0594Mk_BdqmVArZdVUy-RcpZSmvDxR-plkFAU&t=2025-01-14T14%3A29%3A53.506Z',
+    loading: {
+      type: Boolean,
+      default: false,
     },
-  ]
-  loading.value = false
+  },
+
+  computed: {
+    actionIcon(): string {
+      return this.type === 'anime' ? 'mdi-play' : 'mdi-book-open-variant'
+    },
+    actionText(): string {
+      return this.type === 'anime' ? 'Watch Now' : 'Read Now'
+    },
+  },
 })
 </script>
 

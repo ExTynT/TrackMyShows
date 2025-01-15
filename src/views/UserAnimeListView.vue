@@ -1,0 +1,397 @@
+<template>
+  <div class="user-anime-list">
+    <v-container class="py-12">
+      <!-- Header Section -->
+      <div class="header-section mb-12">
+        <div class="d-flex align-center justify-space-between mb-3">
+          <h1 class="text-h3 font-weight-bold">My Anime List</h1>
+          <v-btn-group>
+            <v-btn :color="'primary'" variant="tonal" class="text-none" :to="'/user/anime'">
+              <v-icon start>mdi-television-classic</v-icon>
+              Anime
+            </v-btn>
+            <v-btn :color="'primary'" variant="outlined" class="text-none" :to="'/user/manga'">
+              <v-icon start>mdi-book-open-variant</v-icon>
+              Manga
+            </v-btn>
+          </v-btn-group>
+        </div>
+        <div class="text-subtitle-1 text-grey">Track and manage your anime watching progress</div>
+      </div>
+
+      <!-- Status Tabs -->
+      <v-card class="mb-8" variant="flat">
+        <MediaStatusTabs v-model="selectedStatus" :tabs="tabs" />
+      </v-card>
+
+      <!-- Statistics -->
+      <v-card class="mb-8" variant="flat">
+        <MediaStatistics
+          type="anime"
+          :total-items="totalAnime"
+          :total-episodes-or-chapters="totalEpisodesWatched"
+          :average-rating="averageRating"
+          :completion-rate="completionRate"
+        />
+      </v-card>
+
+      <!-- Loading State -->
+      <v-row v-if="store.loading">
+        <v-col cols="12" class="d-flex justify-center align-center" style="min-height: 400px">
+          <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+        </v-col>
+      </v-row>
+
+      <!-- Content -->
+      <template v-else>
+        <v-row v-if="displayedAnimeList.length > 0">
+          <v-col v-for="item in displayedAnimeList" :key="item.id" cols="12">
+            <v-hover v-slot="{ isHovering, props }">
+              <v-card
+                v-bind="props"
+                :elevation="isHovering ? 8 : 2"
+                :class="{ 'on-hover': isHovering }"
+                class="transition-swing"
+              >
+                <div class="d-flex">
+                  <!-- Image Section -->
+                  <div class="media-image-container">
+                    <v-img
+                      :src="item.anime.image_url"
+                      width="180"
+                      height="250"
+                      cover
+                      class="rounded-lg"
+                    ></v-img>
+                  </div>
+
+                  <!-- Content Section -->
+                  <div class="flex-grow-1 pa-4">
+                    <!-- Title and Info -->
+                    <div class="d-flex flex-column">
+                      <h3 class="text-h5 font-weight-bold mb-2">{{ item.anime.title }}</h3>
+                      <v-textarea
+                        v-model="item.notes"
+                        label="Notes"
+                        variant="outlined"
+                        density="comfortable"
+                        rows="2"
+                        hide-details
+                        class="mb-4"
+                        placeholder="Add your notes here..."
+                        @change="updateNotes(item)"
+                      ></v-textarea>
+
+                      <!-- Genres -->
+                      <div class="mb-4">
+                        <v-chip
+                          v-for="genre in item.anime.genres"
+                          :key="genre.genres.id"
+                          size="small"
+                          class="mr-2 mb-2"
+                          variant="outlined"
+                        >
+                          {{ genre.genres.name }}
+                        </v-chip>
+                      </div>
+
+                      <!-- Rating -->
+                      <div class="d-flex align-center mb-4">
+                        <v-rating
+                          v-model="item.rating"
+                          color="amber"
+                          half-increments
+                          density="compact"
+                          size="small"
+                          @update:model-value="updateRating(item, Number($event))"
+                        ></v-rating>
+                        <span class="text-body-2 text-grey-lighten-1 ml-2"
+                          >{{ item.rating || 0 }}/5</span
+                        >
+                      </div>
+
+                      <!-- Episode Controls -->
+                      <div class="d-flex align-center">
+                        <v-btn
+                          icon="mdi-minus"
+                          variant="text"
+                          density="comfortable"
+                          :disabled="item.episodes_watched <= 0"
+                          @click="updateEpisodes(item, -1)"
+                        ></v-btn>
+                        <div class="mx-4">
+                          <span class="text-h6">{{ item.episodes_watched }}</span>
+                          <span class="text-subtitle-1 text-grey">
+                            / {{ item.anime.episodes || '?' }} Episodes
+                          </span>
+                        </div>
+                        <v-btn
+                          icon="mdi-plus"
+                          variant="text"
+                          density="comfortable"
+                          :disabled="item.episodes_watched >= (item.anime.episodes || Infinity)"
+                          @click="updateEpisodes(item, 1)"
+                        ></v-btn>
+
+                        <!-- Status and Favorite Menu -->
+                        <v-menu>
+                          <template v-slot:activator="{ props }">
+                            <v-btn
+                              icon="mdi-dots-vertical"
+                              variant="text"
+                              v-bind="props"
+                              class="ml-2"
+                            ></v-btn>
+                          </template>
+                          <v-list>
+                            <v-list-subheader>Status</v-list-subheader>
+                            <v-list-item
+                              v-for="tab in tabs"
+                              :key="tab.value"
+                              :value="tab.value"
+                              @click="
+                                tab.value !== 'favorites'
+                                  ? updateStatus(item, tab.value as UserAnimeStatus)
+                                  : toggleFavorite(item)
+                              "
+                            >
+                              <template v-slot:prepend>
+                                <v-icon :icon="tab.icon"></v-icon>
+                              </template>
+                              <v-list-item-title>{{ tab.label }}</v-list-item-title>
+                              <template v-slot:append>
+                                <v-icon
+                                  v-if="
+                                    tab.value === 'favorites'
+                                      ? item.favorite
+                                      : item.status === tab.value
+                                  "
+                                  :color="tab.value === 'favorites' ? 'error' : 'primary'"
+                                  icon="mdi-check"
+                                ></v-icon>
+                              </template>
+                            </v-list-item>
+
+                            <v-divider></v-divider>
+
+                            <v-list-item @click="toggleFavorite(item)">
+                              <template v-slot:prepend>
+                                <v-icon
+                                  :icon="item.favorite ? 'mdi-heart' : 'mdi-heart-outline'"
+                                ></v-icon>
+                              </template>
+                              <v-list-item-title>Favorite</v-list-item-title>
+                              <template v-slot:append>
+                                <v-icon
+                                  v-if="item.favorite"
+                                  color="error"
+                                  icon="mdi-check"
+                                ></v-icon>
+                              </template>
+                            </v-list-item>
+                          </v-list>
+                        </v-menu>
+
+                        <!-- Remove Button -->
+                        <v-spacer></v-spacer>
+                        <v-btn
+                          color="error"
+                          variant="text"
+                          prepend-icon="mdi-delete"
+                          @click="removeFromList(item)"
+                        >
+                          Remove
+                        </v-btn>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </v-card>
+            </v-hover>
+          </v-col>
+        </v-row>
+
+        <!-- Empty State -->
+        <v-row v-else>
+          <v-col cols="12">
+            <v-card class="pa-12 text-center" variant="flat">
+              <v-icon size="64" color="grey" class="mb-4">mdi-playlist-remove</v-icon>
+              <h2 class="text-h5 text-grey-darken-1 mb-2">No anime in this list yet</h2>
+              <p class="text-body-1 text-grey mb-6">
+                Start adding anime to your list to track your progress
+              </p>
+              <v-btn color="primary" prepend-icon="mdi-plus" @click="router.push('/anime')">
+                Add Anime
+              </v-btn>
+            </v-card>
+          </v-col>
+        </v-row>
+      </template>
+    </v-container>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserAnimeListStore } from '@/stores/userAnimeListStore'
+import { useAnimeListActions } from '@/composables/useAnimeListActions'
+import MediaStatusTabs from '@/components/common/MediaStatusTabs.vue'
+import MediaStatistics from '@/components/common/MediaStatistics.vue'
+import type { UserAnimeListItem, UserAnimeStatus } from '@/types/anime'
+
+export default defineComponent({
+  name: 'UserAnimeListView',
+
+  components: {
+    MediaStatusTabs,
+    MediaStatistics,
+  },
+
+  data() {
+    return {
+      store: useUserAnimeListStore(),
+      actions: useAnimeListActions(),
+      router: useRouter(),
+      selectedStatus: 'watching',
+      tabs: [
+        { label: 'Watching', value: 'watching' as UserAnimeStatus, icon: 'mdi-play-circle' },
+        { label: 'Completed', value: 'completed' as UserAnimeStatus, icon: 'mdi-check-circle' },
+        { label: 'On Hold', value: 'on_hold' as UserAnimeStatus, icon: 'mdi-pause-circle' },
+        { label: 'Plan to Watch', value: 'plan_to_watch' as UserAnimeStatus, icon: 'mdi-clock' },
+        { label: 'Dropped', value: 'dropped' as UserAnimeStatus, icon: 'mdi-close-circle' },
+        { label: 'Favorites', value: 'favorites', icon: 'mdi-heart' },
+      ],
+    }
+  },
+
+  computed: {
+    displayedAnimeList() {
+      if (this.selectedStatus === 'favorites') {
+        return this.store.list.filter((item) => item.favorite)
+      }
+      return this.store.list.filter((item) => item.status === this.selectedStatus)
+    },
+
+    totalAnime() {
+      return this.store.list.length
+    },
+
+    totalEpisodesWatched() {
+      return this.store.list.reduce((sum, item) => sum + item.episodes_watched, 0)
+    },
+
+    averageRating() {
+      const ratedAnime = this.store.list.filter((item) => item.rating)
+      if (!ratedAnime.length) return 0
+      return ratedAnime.reduce((sum, item) => sum + (item.rating || 0), 0) / ratedAnime.length
+    },
+
+    completionRate() {
+      const completed = this.store.list.filter((item) => item.status === 'completed').length
+      return this.totalAnime ? (completed / this.totalAnime) * 100 : 0
+    },
+  },
+
+  methods: {
+    async updateEpisodes(item: UserAnimeListItem, change: number) {
+      const newCount = item.episodes_watched + change
+      await this.actions.updateEpisodes(item.anime_id, newCount)
+
+      // Auto-complete when reaching last episode
+      if (newCount === item.anime.episodes && item.status !== 'completed') {
+        await this.actions.updateStatus(item.anime_id, 'completed')
+      }
+      // Change back to watching when decreasing from max episodes
+      else if (newCount < item.anime.episodes && item.status === 'completed') {
+        await this.actions.updateStatus(item.anime_id, 'watching')
+      }
+    },
+
+    async updateNotes(item: UserAnimeListItem) {
+      await this.actions.updateNotes(item.anime_id, item.notes || '')
+    },
+
+    async updateRating(item: UserAnimeListItem, rating: number) {
+      await this.actions.updateRating(item.anime_id, rating)
+    },
+
+    async removeFromList(item: UserAnimeListItem) {
+      if (confirm('Are you sure you want to remove this anime from your list?')) {
+        await this.actions.removeFromList(item.anime_id)
+      }
+    },
+
+    async updateStatus(item: UserAnimeListItem, status: UserAnimeStatus) {
+      await this.actions.updateStatus(item.anime_id, status)
+    },
+
+    async toggleFavorite(item: UserAnimeListItem) {
+      await this.actions.toggleFavorite(item.anime_id)
+    },
+  },
+
+  async created() {
+    try {
+      await this.store.fetchUserList()
+    } catch (error) {
+      console.error('Error fetching user list:', error)
+    }
+  },
+
+  async mounted() {
+    if (this.store.list.length === 0) {
+      await this.store.fetchUserList()
+    }
+  },
+})
+</script>
+
+<style scoped>
+.user-anime-list {
+  min-height: 100vh;
+  background: #121212;
+  color: white;
+}
+
+.header-section {
+  position: relative;
+}
+
+.header-section::after {
+  content: '';
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: var(--v-primary-base);
+  border-radius: 2px;
+}
+
+.media-image-container {
+  flex-shrink: 0;
+  width: 180px;
+  height: 250px;
+  overflow: hidden;
+}
+
+.on-hover {
+  transform: translateY(-4px);
+}
+
+.transition-swing {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+}
+
+:deep(.v-card) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+:deep(.v-btn) {
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+</style>

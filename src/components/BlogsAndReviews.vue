@@ -50,16 +50,24 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from 'vue'
 import { useBlogStore } from '@/stores/blog'
-import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-const router = useRouter()
-const blogStore = useBlogStore()
+export default defineComponent({
+  name: 'BlogsAndReviews',
 
-onMounted(() => {
-  blogStore.fetchPosts()
+  data() {
+    return {
+      router: useRouter(),
+      blogStore: useBlogStore(),
+    }
+  },
+
+  mounted() {
+    this.blogStore.fetchPosts()
+  },
 })
 </script>
 

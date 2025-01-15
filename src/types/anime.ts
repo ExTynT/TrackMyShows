@@ -1,6 +1,18 @@
 export type AnimeStatus = 'airing' | 'finished' | 'upcoming'
 export type AnimeSeason = 'winter' | 'spring' | 'summer' | 'fall'
-export type UserAnimeStatus = 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch'
+export type UserAnimeStatus = 'watching' | 'completed' | 'on_hold' | 'plan_to_watch' | 'dropped'
+
+export interface TabOption {
+  label: string
+  value: UserAnimeStatus | 'favorites'
+  icon: string
+}
+
+export interface StatusOption {
+  label: string
+  value: UserAnimeStatus
+  icon: string
+}
 
 export interface Anime {
   id: number
@@ -19,6 +31,8 @@ export interface Anime {
   studios?: StudioRelation[]
   characters?: Character[]
   reviews?: AnimeReview[]
+  airing_start?: string
+  airing_end?: string
 }
 
 export interface GenreRelation {
@@ -60,13 +74,34 @@ export interface AnimeReview {
 }
 
 export interface UserAnimeListItem {
+  id: number
   user_id: string
   anime_id: number
   status: UserAnimeStatus
-  episodes_watched: number
   rating?: number
+  episodes_watched: number
   notes?: string
+  start_date?: string
+  finish_date?: string
+  rewatch_count: number
+  favorite: boolean
   created_at: string
   updated_at: string
-  anime?: Anime
+  anime: {
+    id: number
+    title: string
+    image_url: string
+    episodes: number
+    status: string
+    synopsis?: string
+    genres?: GenreRelation[]
+  }
+}
+
+export interface AnimeStatistics {
+  totalAnime: number
+  totalEpisodes: number
+  averageRating: number
+  completionRate: number
+  totalRewatches: number
 }
