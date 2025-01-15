@@ -55,7 +55,11 @@
               >
                 <div class="d-flex">
                   <!-- Image Section -->
-                  <div class="media-image-container">
+                  <div
+                    class="media-image-container"
+                    style="cursor: pointer"
+                    @click="router.push(`/manga/${item.manga.id}`)"
+                  >
                     <v-img
                       :src="item.manga.image_url"
                       width="180"

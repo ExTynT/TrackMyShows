@@ -1,18 +1,13 @@
 <template>
   <section class="carousel-section">
     <v-progress-circular
-      v-if="carouselStore.loading"
+      v-if="loading"
       indeterminate
       color="primary"
       class="loader"
     ></v-progress-circular>
     <v-carousel v-else cycle height="400" hide-delimiter-background show-arrows="hover">
-      <v-carousel-item
-        v-for="slide in carouselStore.slides"
-        :key="slide.id"
-        :src="slide.image_url"
-        cover
-      >
+      <v-carousel-item v-for="slide in slides" :key="slide.id" :src="slide.image_url" cover>
         <div class="carousel-content">
           <h2 class="carousel-title">{{ slide.title }}</h2>
           <p class="carousel-description">{{ slide.description }}</p>
@@ -25,14 +20,40 @@
   </section>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from 'vue'
 import { useCarouselStore } from '@/stores/carousel'
-import { onMounted } from 'vue'
+import type { HomeCarouselSlide } from '@/types/carousel'
 
-const carouselStore = useCarouselStore()
+export default defineComponent({
+  name: 'HeroCarousel',
 
-onMounted(() => {
-  carouselStore.fetchSlides()
+  data() {
+    const store = useCarouselStore()
+    return {
+      carouselStore: store,
+      slides: [] as HomeCarouselSlide[],
+      loading: true,
+    }
+  },
+
+  methods: {
+    async fetchData() {
+      this.loading = true
+      try {
+        await this.carouselStore.fetchSlides()
+        this.slides = this.carouselStore.slides
+      } catch (error) {
+        console.error('Error fetching slides:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+  },
+
+  mounted() {
+    this.fetchData()
+  },
 })
 </script>
 

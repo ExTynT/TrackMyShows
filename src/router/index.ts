@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import AnimeView from '@/views/AnimeView.vue'
 import AnimeDetailView from '../views/AnimeDetailView.vue'
-import AnimeGenreView from '../views/AnimeGenreView.vue'
 import NewsDetailView from '../views/NewsDetailView.vue'
 import BlogDetailView from '../views/BlogDetailView.vue'
 import SignInView from '../views/SignInView.vue'
@@ -37,11 +36,6 @@ const router = createRouter({
       path: '/anime/:id',
       name: 'anime-detail',
       component: AnimeDetailView,
-    },
-    {
-      path: '/anime/genre/:id',
-      name: 'anime-genre',
-      component: AnimeGenreView,
     },
     {
       path: '/news/:slug',
@@ -80,6 +74,11 @@ const router = createRouter({
       path: '/user/manga',
       name: 'user-manga-list',
       component: () => import('@/views/UserMangaListView.vue'),
+    },
+    {
+      path: '/list',
+      name: 'list',
+      component: () => import('@/views/ListView.vue'),
     },
   ],
 })

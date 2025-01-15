@@ -11,6 +11,7 @@
         <div class="nav-links">
           <v-btn variant="text" to="/anime">Anime</v-btn>
           <v-btn variant="text" to="/manga">Manga</v-btn>
+          <v-btn variant="text" to="/list">List</v-btn>
         </div>
       </div>
 
@@ -29,23 +30,34 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore } from '../stores/authStore'
+import type { Router } from 'vue-router'
 import { useRouter } from 'vue-router'
+
+interface NavigationState {
+  authStore: ReturnType<typeof useAuthStore>
+  router: Router
+}
 
 export default defineComponent({
   name: 'NavigationBar',
 
-  data() {
+  data(): NavigationState {
+    const store = useAuthStore()
     return {
+      authStore: store,
       router: useRouter(),
-      authStore: useAuthStore(),
     }
   },
 
   methods: {
-    async handleSignOut() {
-      await this.authStore.signOut()
-      this.router.push('/signin')
+    async handleSignOut(): Promise<void> {
+      try {
+        await this.authStore.signOut()
+        this.router.push('/signin')
+      } catch (error) {
+        console.error('Error signing out:', error)
+      }
     },
   },
 })

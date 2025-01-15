@@ -46,7 +46,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type { CarouselSlide } from '@/types/carousel'
+import type { MediaCarouselSlide } from '@/types/carousel'
 
 export default defineComponent({
   name: 'MediaHeroCarousel',
@@ -58,7 +58,7 @@ export default defineComponent({
       validator: (value: string) => ['anime', 'manga'].includes(value),
     },
     slides: {
-      type: Array as () => CarouselSlide[],
+      type: Array as () => MediaCarouselSlide[],
       required: true,
     },
     loading: {

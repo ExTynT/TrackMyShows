@@ -2,17 +2,18 @@
   <section class="news-section">
     <h2 class="section-title">Latest News</h2>
     <v-progress-circular
-      v-if="newsStore.loading"
+      v-if="loading"
       indeterminate
       color="primary"
       class="loader"
     ></v-progress-circular>
     <div v-else class="news-grid">
       <v-card
-        v-for="news in newsStore.news"
+        v-for="news in latestNews"
         :key="news.id"
         :to="{ name: 'news-detail', params: { slug: news.link_slug } }"
         class="news-card"
+        elevation="0"
       >
         <div class="news-image">
           <v-img :src="news.image_url" height="180" cover></v-img>
@@ -21,7 +22,7 @@
           <h3 class="news-title">{{ news.title }}</h3>
           <p class="news-description">{{ news.description }}</p>
           <div class="news-meta">
-            <span class="news-date">{{ news.date }}</span>
+            <span class="news-date">{{ formatDate(news.date) }}</span>
           </div>
         </div>
       </v-card>
@@ -29,14 +30,53 @@
   </section>
 </template>
 
-<script setup lang="ts">
-import { useNewsStore } from '@/stores/news'
-import { onMounted } from 'vue'
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { useNewsStore } from '../stores/news'
+import type { NewsItem } from '../types/news'
 
-const newsStore = useNewsStore()
+export default defineComponent({
+  name: 'LatestNews',
 
-onMounted(() => {
-  newsStore.fetchNews()
+  data() {
+    const store = useNewsStore()
+    return {
+      newsStore: store,
+      loading: true,
+    }
+  },
+
+  computed: {
+    latestNews(): NewsItem[] {
+      return this.newsStore.news.slice(0, 4)
+    },
+  },
+
+  methods: {
+    formatDate(dateString: string): string {
+      const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }
+      return new Date(dateString).toLocaleDateString('en-US', options)
+    },
+
+    async fetchData() {
+      this.loading = true
+      try {
+        await this.newsStore.fetchNews()
+      } catch (error) {
+        console.error('Error fetching news:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+  },
+
+  mounted() {
+    this.fetchData()
+  },
 })
 </script>
 
@@ -80,13 +120,14 @@ onMounted(() => {
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .news-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
 
 .news-image {
@@ -112,38 +153,35 @@ onMounted(() => {
   margin-bottom: 12px;
   line-height: 1.4;
   color: var(--v-primary-base);
-  transition: color 0.2s ease;
+  letter-spacing: -0.5px;
 }
 
 .news-description {
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  letter-spacing: 0.2px;
 }
 
 .news-meta {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.5);
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .news-date {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.news-date::before {
-  content: '';
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background-color: var(--v-primary-base);
-  border-radius: 50%;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 @media (max-width: 768px) {
@@ -155,10 +193,6 @@ onMounted(() => {
   .section-title {
     font-size: 24px;
     margin-bottom: 24px;
-  }
-
-  .news-content {
-    padding: 20px;
   }
 
   .news-title {

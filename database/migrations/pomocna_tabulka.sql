@@ -1,4 +1,4 @@
--- Update user_anime_list table
+
 ALTER TABLE user_anime_list 
 ADD COLUMN IF NOT EXISTS start_date TIMESTAMP WITH TIME ZONE,
 ADD COLUMN IF NOT EXISTS finish_date TIMESTAMP WITH TIME ZONE,

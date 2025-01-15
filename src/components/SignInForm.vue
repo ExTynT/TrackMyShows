@@ -10,10 +10,7 @@
         label="Email"
         type="email"
         required
-        :rules="[
-          (v) => !!v || 'Email is required',
-          (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
-        ]"
+        :rules="emailRules"
       ></v-text-field>
 
       <v-text-field
@@ -21,7 +18,7 @@
         label="Password"
         type="password"
         required
-        :rules="[(v) => !!v || 'Password is required']"
+        :rules="passwordRules"
       ></v-text-field>
 
       <v-btn
@@ -54,33 +51,58 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore } from '../stores/authStore'
+import type { Router } from 'vue-router'
+
+interface SignInFormState {
+  router: Router
+  authStore: ReturnType<typeof useAuthStore>
+  email: string
+  password: string
+  emailRules: ((v: string) => boolean | string)[]
+  passwordRules: ((v: string) => boolean | string)[]
+}
 
 export default defineComponent({
   name: 'SignInForm',
 
-  data() {
+  data(): SignInFormState {
+    const store = useAuthStore()
     return {
       router: useRouter(),
-      authStore: useAuthStore(),
+      authStore: store,
       email: '',
       password: '',
+      emailRules: [
+        (v: string) => !!v || 'Email is required',
+        (v: string) => /.+@.+\..+/.test(v) || 'Email must be valid',
+      ],
+      passwordRules: [(v: string) => !!v || 'Password is required'],
     }
   },
 
   computed: {
     isValid(): boolean {
-      return !!(this.email && this.password && /.+@.+\..+/.test(this.email))
+      return !!(
+        this.email &&
+        this.password &&
+        /.+@.+\..+/.test(this.email) &&
+        !this.authStore.loading
+      )
     },
   },
 
   methods: {
-    async handleSubmit() {
+    async handleSubmit(): Promise<void> {
       if (!this.isValid) return
 
-      await this.authStore.signIn(this.email, this.password)
-      if (!this.authStore.error) {
-        this.router.push('/')
+      try {
+        await this.authStore.signIn(this.email, this.password)
+        if (!this.authStore.error) {
+          await this.router.push('/')
+        }
+      } catch (error) {
+        console.error('Sign in error:', error)
       }
     },
   },

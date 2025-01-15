@@ -9,6 +9,9 @@ export interface NewsItem {
   image_url: string
   link_slug: string
   full_content: string
+  previous_id: number | null
+  next_id: number | null
+  author: string
 }
 
 export const useNewsStore = defineStore('news', {

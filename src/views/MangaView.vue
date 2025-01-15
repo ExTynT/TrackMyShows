@@ -55,16 +55,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import { useMangaStore } from '@/stores/mangaStore'
-import MediaHeroCarousel from '@/components/common/MediaHeroCarousel.vue'
-import TopRatedMediaCard from '@/components/common/TopRatedMediaCard.vue'
-import MediaReviewsSection from '@/components/common/MediaReviewsSection.vue'
-import MediaCurrentlyAiring from '@/components/common/MediaCurrentlyAiring.vue'
-import MediaStatistics from '@/components/common/MediaStatistics.vue'
-import MediaUpcoming from '@/components/common/MediaUpcoming.vue'
-import type { CarouselSlide } from '@/types/carousel'
+import { useMangaStore } from '../stores/mangaStore'
+import MediaHeroCarousel from '../components/common/MediaHeroCarousel.vue'
+import TopRatedMediaCard from '../components/common/TopRatedMediaCard.vue'
+import MediaReviewsSection from '../components/common/MediaReviewsSection.vue'
+import MediaCurrentlyAiring from '../components/common/MediaCurrentlyAiring.vue'
+import MediaStatistics from '../components/common/MediaStatistics.vue'
+import MediaUpcoming from '../components/common/MediaUpcoming.vue'
+import type { MediaCarouselSlide } from '../types/carousel'
 
 export default defineComponent({
   name: 'MangaView',
@@ -78,51 +78,12 @@ export default defineComponent({
     MediaUpcoming,
   },
 
-  setup() {
-    const mangaStore = useMangaStore()
-    const router = useRouter()
-    const carouselLoading = ref(true)
-    const carouselSlides = ref<CarouselSlide[]>([])
-
-    const navigateToManga = (id: number) => {
-      router.push(`/manga/${id}`)
-    }
-
-    const prepareCarouselSlides = async () => {
-      carouselLoading.value = true
-      try {
-        // Počkáme na načítanie mangy
-        await mangaStore.fetchMangaList()
-
-        // Vyberieme top 3 mangy podľa ratingu
-        const topManga = [...mangaStore.mangaList]
-          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-          .slice(0, 3)
-
-        carouselSlides.value = topManga.map((manga) => ({
-          id: manga.id,
-          title: manga.title,
-          description: manga.synopsis,
-          cover_image_url: manga.cover_image_url || manga.image_url,
-          rating: manga.rating || 0,
-        }))
-      } catch (error) {
-        console.error('Error preparing carousel slides:', error)
-      } finally {
-        carouselLoading.value = false
-      }
-    }
-
-    onMounted(() => {
-      prepareCarouselSlides()
-    })
-
+  data() {
     return {
-      mangaStore,
-      router,
-      carouselLoading,
-      carouselSlides,
-      navigateToManga,
+      mangaStore: useMangaStore(),
+      router: useRouter(),
+      carouselLoading: true,
+      carouselSlides: [] as MediaCarouselSlide[],
     }
   },
 
@@ -152,6 +113,43 @@ export default defineComponent({
       ).length
       return (completed / this.totalManga) * 100
     },
+  },
+
+  methods: {
+    navigateToManga(id: number) {
+      this.router.push(`/manga/${id}`)
+    },
+
+    async prepareCarouselSlides() {
+      this.carouselLoading = true
+      try {
+        // Load manga if not already loaded
+        if (this.mangaStore.mangaList.length === 0) {
+          await this.mangaStore.fetchMangaList()
+        }
+
+        // Get top 3 manga by rating
+        const topManga = [...this.mangaStore.mangaList]
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+          .slice(0, 3)
+
+        this.carouselSlides = topManga.map((manga) => ({
+          id: manga.id,
+          title: manga.title,
+          description: manga.synopsis,
+          cover_image_url: manga.cover_image_url || manga.image_url,
+          rating: manga.rating || 0,
+        }))
+      } catch (error) {
+        console.error('Error preparing carousel slides:', error)
+      } finally {
+        this.carouselLoading = false
+      }
+    },
+  },
+
+  async mounted() {
+    await this.prepareCarouselSlides()
   },
 })
 </script>

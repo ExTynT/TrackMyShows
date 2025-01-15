@@ -57,7 +57,6 @@ export const useMangaStore = defineStore('manga', () => {
 
       console.log('Fetching manga list...')
 
-      // First, let's try to get just manga without relations
       const { data: mangaData, error: mangaErr } = await supabase
         .from('manga')
         .select('*')
@@ -70,7 +69,6 @@ export const useMangaStore = defineStore('manga', () => {
 
       console.log('Basic manga data:', mangaData)
 
-      // Then get relations separately
       const { data: genreData, error: genreErr } = await supabase.from('manga_genre_relations')
         .select(`
           manga_id,
@@ -97,7 +95,6 @@ export const useMangaStore = defineStore('manga', () => {
 
       console.log('Author relations:', authorData)
 
-      // Now combine the data
       mangaList.value = mangaData.map((manga) => {
         const mangaGenres = genreData
           .filter((g) => g.manga_id === manga.id)

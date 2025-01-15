@@ -10,20 +10,14 @@
         label="Email"
         type="email"
         required
-        :rules="[
-          (v) => !!v || 'Email is required',
-          (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
-        ]"
+        :rules="emailRules"
       ></v-text-field>
 
       <v-text-field
         v-model="username"
         label="Username"
         required
-        :rules="[
-          (v) => !!v || 'Username is required',
-          (v) => v.length >= 3 || 'Username must be at least 3 characters',
-        ]"
+        :rules="usernameRules"
       ></v-text-field>
 
       <v-text-field
@@ -31,10 +25,7 @@
         label="Password"
         type="password"
         required
-        :rules="[
-          (v) => !!v || 'Password is required',
-          (v) => v.length >= 6 || 'Password must be at least 6 characters',
-        ]"
+        :rules="passwordRules"
       ></v-text-field>
 
       <v-text-field
@@ -42,10 +33,7 @@
         label="Confirm Password"
         type="password"
         required
-        :rules="[
-          (v) => !!v || 'Please confirm your password',
-          (v) => v === password || 'Passwords must match',
-        ]"
+        :rules="confirmPasswordRules"
       ></v-text-field>
 
       <v-btn
@@ -78,23 +66,55 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore } from '../stores/authStore'
+import type { Router } from 'vue-router'
+
+interface SignUpFormState {
+  router: Router
+  authStore: ReturnType<typeof useAuthStore>
+  email: string
+  username: string
+  password: string
+  confirmPassword: string
+  emailRules: ((v: string) => boolean | string)[]
+  usernameRules: ((v: string) => boolean | string)[]
+  passwordRules: ((v: string) => boolean | string)[]
+}
 
 export default defineComponent({
   name: 'SignUpForm',
 
-  data() {
+  data(): SignUpFormState {
+    const store = useAuthStore()
     return {
       router: useRouter(),
-      authStore: useAuthStore(),
+      authStore: store,
       email: '',
       username: '',
       password: '',
       confirmPassword: '',
+      emailRules: [
+        (v: string) => !!v || 'Email is required',
+        (v: string) => /.+@.+\..+/.test(v) || 'Email must be valid',
+      ],
+      usernameRules: [
+        (v: string) => !!v || 'Username is required',
+        (v: string) => v.length >= 3 || 'Username must be at least 3 characters',
+      ],
+      passwordRules: [
+        (v: string) => !!v || 'Password is required',
+        (v: string) => v.length >= 6 || 'Password must be at least 6 characters',
+      ],
     }
   },
 
   computed: {
+    confirmPasswordRules(): ((v: string) => boolean | string)[] {
+      return [
+        (v: string) => !!v || 'Please confirm your password',
+        (v: string) => v === this.password || 'Passwords must match',
+      ]
+    },
     isValid(): boolean {
       return !!(
         this.email &&
@@ -104,18 +124,23 @@ export default defineComponent({
         /.+@.+\..+/.test(this.email) &&
         this.username.length >= 3 &&
         this.password.length >= 6 &&
-        this.password === this.confirmPassword
+        this.password === this.confirmPassword &&
+        !this.authStore.loading
       )
     },
   },
 
   methods: {
-    async handleSubmit() {
+    async handleSubmit(): Promise<void> {
       if (!this.isValid) return
 
-      await this.authStore.signUp(this.email, this.password, this.username)
-      if (!this.authStore.error) {
-        this.router.push('/')
+      try {
+        await this.authStore.signUp(this.email, this.password, this.username)
+        if (!this.authStore.error) {
+          await this.router.push('/')
+        }
+      } catch (error) {
+        console.error('Sign up error:', error)
       }
     },
   },

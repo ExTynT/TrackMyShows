@@ -11,6 +11,8 @@ export interface BlogPost {
   image_url?: string
   category: 'blog' | 'review'
   rating?: number
+  created_at: string
+  updated_at: string
 }
 
 export const useBlogStore = defineStore('blog', {
@@ -29,6 +31,7 @@ export const useBlogStore = defineStore('blog', {
   actions: {
     async fetchPosts() {
       this.loading = true
+      this.error = null
       try {
         const { data, error } = await supabase
           .from('blog_posts')
@@ -38,7 +41,8 @@ export const useBlogStore = defineStore('blog', {
         if (error) throw error
         this.posts = data
       } catch (err) {
-        this.error = err instanceof Error ? err.message : 'Failed to fetch posts'
+        console.error('Blog error:', err)
+        this.error = 'Failed to fetch blog posts'
       } finally {
         this.loading = false
       }
@@ -62,50 +66,27 @@ export const useBlogStore = defineStore('blog', {
     },
 
     async addPost(post: Omit<BlogPost, 'id'>) {
-      try {
-        const { data, error } = await supabase.from('blog_posts').insert(post).select().single()
+      const { data, error } = await supabase.from('blog_posts').insert([post]).select()
 
-        if (error) throw error
-        this.posts.unshift(data)
-      } catch (err) {
-        this.error = err instanceof Error ? err.message : 'Failed to add post'
-        throw err
-      }
+      if (error) throw error
+      return data[0]
     },
 
     async updatePost(id: number, updates: Partial<BlogPost>) {
-      try {
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .update(updates)
-          .eq('id', id)
-          .select()
-          .single()
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .update(updates)
+        .eq('id', id)
+        .select()
 
-        if (error) throw error
-        const index = this.posts.findIndex((post) => post.id === id)
-        if (index !== -1) {
-          this.posts[index] = data
-        }
-      } catch (err) {
-        this.error = err instanceof Error ? err.message : 'Failed to update post'
-        throw err
-      }
+      if (error) throw error
+      return data[0]
     },
 
     async removePost(id: number) {
-      try {
-        const { error } = await supabase.from('blog_posts').delete().eq('id', id)
+      const { error } = await supabase.from('blog_posts').delete().eq('id', id)
 
-        if (error) throw error
-        const index = this.posts.findIndex((post) => post.id === id)
-        if (index !== -1) {
-          this.posts.splice(index, 1)
-        }
-      } catch (err) {
-        this.error = err instanceof Error ? err.message : 'Failed to remove post'
-        throw err
-      }
+      if (error) throw error
     },
   },
 })

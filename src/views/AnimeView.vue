@@ -62,14 +62,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAnimeStore } from '@/stores/animeStore'
-import MediaHeroCarousel from '@/components/common/MediaHeroCarousel.vue'
-import TopRatedMediaCard from '@/components/common/TopRatedMediaCard.vue'
-import MediaReviewsSection from '@/components/common/MediaReviewsSection.vue'
-import MediaCurrentlyAiring from '@/components/common/MediaCurrentlyAiring.vue'
-import MediaStatistics from '@/components/common/MediaStatistics.vue'
-import MediaUpcoming from '@/components/common/MediaUpcoming.vue'
-import type { CarouselSlide } from '@/types/carousel'
+import { useAnimeStore } from '../stores/animeStore'
+import MediaHeroCarousel from '../components/common/MediaHeroCarousel.vue'
+import TopRatedMediaCard from '../components/common/TopRatedMediaCard.vue'
+import MediaReviewsSection from '../components/common/MediaReviewsSection.vue'
+import MediaCurrentlyAiring from '../components/common/MediaCurrentlyAiring.vue'
+import MediaStatistics from '../components/common/MediaStatistics.vue'
+import MediaUpcoming from '../components/common/MediaUpcoming.vue'
+import type { MediaCarouselSlide } from '../types/carousel'
 
 export default defineComponent({
   name: 'AnimeView',
@@ -85,15 +85,11 @@ export default defineComponent({
 
   data() {
     return {
+      animeStore: useAnimeStore(),
+      router: useRouter(),
       carouselLoading: true,
-      carouselSlides: [] as CarouselSlide[],
+      carouselSlides: [] as MediaCarouselSlide[],
     }
-  },
-
-  setup() {
-    const animeStore = useAnimeStore()
-    const router = useRouter()
-    return { animeStore, router }
   },
 
   computed: {
@@ -135,55 +131,24 @@ export default defineComponent({
     },
 
     async prepareCarouselSlides() {
-      if (this.animeStore.animeList.length === 0) {
-        await this.animeStore.fetchAnimeList()
+      try {
+        this.carouselLoading = true
+        const topAnime = [...this.animeStore.animeList]
+          .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+          .slice(0, 5)
+
+        this.carouselSlides = topAnime.map((anime) => ({
+          id: anime.id,
+          title: anime.title,
+          description: anime.synopsis || '',
+          rating: anime.rating || 0,
+          cover_image_url: anime.cover_image_url || anime.image_url || '',
+        }))
+      } catch (error) {
+        console.error('Error preparing carousel slides:', error)
+      } finally {
+        this.carouselLoading = false
       }
-
-      // Find the IDs of Demon Slayer, Jujutsu Kaisen, and One Piece
-      const demonSlayerId =
-        this.animeStore.animeList.find(
-          (a) =>
-            a.title.toLowerCase().includes('demon slayer') ||
-            a.title.toLowerCase().includes('kimetsu no yaiba'),
-        )?.id || 1
-
-      const jjkId =
-        this.animeStore.animeList.find((a) => a.title.toLowerCase().includes('jujutsu kaisen'))
-          ?.id || 2
-
-      const onePieceId =
-        this.animeStore.animeList.find((a) => a.title.toLowerCase().includes('one piece'))?.id || 3
-
-      this.carouselSlides = [
-        {
-          id: demonSlayerId,
-          title: 'Demon Slayer: Kimetsu no Yaiba',
-          description:
-            'Experience the breathtaking journey of Tanjiro Kamado, a young demon slayer who seeks to turn his sister back to human and avenge his family. With stunning animation and intense action, this series redefines the boundaries of anime storytelling.',
-          rating: 4.8,
-          cover_image_url:
-            'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/DS.avif?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvRFMuYXZpZiIsImlhdCI6MTczNjg2NDk2MywiZXhwIjoxNzY4NDAwOTYzfQ.H7RKAOjXKq5Q_-z15GjzgGvtufcxO2IFYwoJjELifkE&t=2025-01-14T14%3A29%3A23.359Z',
-        },
-        {
-          id: jjkId,
-          title: 'Jujutsu Kaisen',
-          description:
-            'Dive into a world where curses run rampant and sorcerers must master the art of Cursed Energy. Follow Yuji Itadori as he joins Tokyo Metropolitan Curse Technical School and faces supernatural threats that could destroy humanity.',
-          rating: 4.9,
-          cover_image_url:
-            'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/JJK.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvSkpLLndlYnAiLCJpYXQiOjE3MzY4NjQ5NzgsImV4cCI6MTc2ODQwMDk3OH0.D4n4nAbYEVjXczsanKOhIxnt-tneZh-Vbbc5Jn3SQUc&t=2025-01-14T14%3A29%3A37.857Z',
-        },
-        {
-          id: onePieceId,
-          title: 'One Piece',
-          description:
-            'Join Monkey D. Luffy and his diverse crew on their epic quest to find the legendary One Piece treasure. This long-running series combines adventure, friendship, and spectacular battles in a unique world of pirates and mystery.',
-          rating: 4.7,
-          cover_image_url:
-            'https://npzzfezhgcngyxffruls.supabase.co/storage/v1/object/sign/Images/ANIME/OP.webp?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJJbWFnZXMvQU5JTUUvT1Aud2VicCIsImlhdCI6MTczNjg2NDk5MywiZXhwIjoxNzY4NDAwOTkzfQ.bmCWGP0594Mk_BdqmVArZdVUy-RcpZSmvDxR-plkFAU&t=2025-01-14T14%3A29%3A53.506Z',
-        },
-      ]
-      this.carouselLoading = false
     },
   },
 
