@@ -96,7 +96,7 @@ export default defineComponent({
     MediaDetailSimilar,
   },
 
-  // Základný stav komponenty
+  // Základný stav komponentu
   data() {
     const store = useMangaStore()
     return {
@@ -166,7 +166,7 @@ export default defineComponent({
       try {
         await this.mangaStore.fetchMangaDetail(Number(this.route.params.id))
 
-        // Load user's progress if they have any
+        // Načítanie používateľského progressu, ak existuje
         const userManga = this.mangaStore.userMangaList.find(
           (item) => item.manga_id === Number(this.route.params.id),
         )

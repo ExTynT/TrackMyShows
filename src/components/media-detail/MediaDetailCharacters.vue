@@ -71,7 +71,7 @@ interface Character {
 export default defineComponent({
   name: 'MediaDetailCharacters',
 
-  // Vlastnosti komponenty
+  // Vlastnosti komponentu
   props: {
     // Zoznam postáv na zobrazenie
     characters: {

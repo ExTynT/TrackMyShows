@@ -165,7 +165,7 @@ export default defineComponent({
     },
   },
 
-  // Inicializácia pri načítaní komponenty
+  // Inicializácia pri načítaní komponentu
   async mounted() {
     await this.prepareCarouselSlides()
     if (this.animeStore.animeList.length === 0) {

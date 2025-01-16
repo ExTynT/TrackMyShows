@@ -78,7 +78,7 @@ import type { Media, Credit } from '@/types/media'
 export default defineComponent({
   name: 'MediaDetailInfo',
 
-  // Vlastnosti komponenty
+  // Vlastnosti komponentu
   props: {
     // Typ média (anime/manga)
     type: {

@@ -112,10 +112,10 @@
 
 <script lang="ts">
 // Importy potrebných závislostí
-import { defineComponent, ref, onMounted, computed } from 'vue'
 import { useAnimeStore } from '@/stores/animeStore'
 import { useMangaStore } from '@/stores/mangaStore'
 import { supabase } from '@/lib/supabase'
+import type { PropType } from 'vue'
 import type { ReviewWithMedia } from '@/types/reviews'
 
 // Rozhranie pre odpoveď z databázy
@@ -132,72 +132,80 @@ interface ReviewResponse {
   manga?: { id: number; title: string; image_url: string }
 }
 
-export default defineComponent({
+export default {
   name: 'MediaReviews',
 
   // Vlastnosti komponentu
   props: {
     // Typ média (anime/manga)
     type: {
-      type: String as () => 'anime' | 'manga',
+      type: String as PropType<'anime' | 'manga'>,
       required: true,
     },
   },
 
-  // Nastavenie komponentu
-  setup(props) {
-    // Store pre prácu s dátami
-    const animeStore = useAnimeStore()
-    const mangaStore = useMangaStore()
+  // Dátový model komponentu
+  data() {
+    return {
+      // Store pre prácu s dátami
+      animeStore: useAnimeStore(),
+      mangaStore: useMangaStore(),
 
-    // Reaktívne premenné
-    const reviews = ref<ReviewWithMedia[]>([])
-    const loading = ref(false)
-    const submitting = ref(false)
-    const isAuthenticated = ref(false)
-    const selectedMediaId = ref<number | null>(null)
-    const newReview = ref({
-      rating: 0,
-      content: '',
-      user_id: '',
-    })
+      // Reaktívne premenné
+      reviews: [] as ReviewWithMedia[],
+      loading: false,
+      submitting: false,
+      isAuthenticated: false,
+      selectedMediaId: null as number | null,
+      newReview: {
+        rating: 0,
+        content: '',
+        user_id: '',
+      },
+    }
+  },
 
+  // Computed vlastnosti
+  computed: {
+    // Kontrola platnosti formulára
+    isFormValid(): boolean {
+      return (
+        this.selectedMediaId !== null &&
+        this.newReview.rating > 0 &&
+        this.newReview.content.trim().length > 0
+      )
+    },
+
+    // Zoznam dostupných médií
+    mediaList() {
+      return this.type === 'anime' ? this.animeStore.animeList : this.mangaStore.mangaList
+    },
+  },
+
+  // Metódy komponentu
+  methods: {
     // Kontrola prihlásenia používateľa
-    const checkAuthStatus = async () => {
+    async checkAuthStatus() {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      isAuthenticated.value = !!user
-    }
-
-    // Kontrola platnosti formulára
-    const isFormValid = computed(() => {
-      return (
-        selectedMediaId.value !== null &&
-        newReview.value.rating > 0 &&
-        newReview.value.content.trim().length > 0
-      )
-    })
-
-    // Zoznam dostupných médií
-    const mediaList = computed(() => {
-      return props.type === 'anime' ? animeStore.animeList : mangaStore.mangaList
-    })
+      this.isAuthenticated = !!user
+    },
 
     // Získanie názvu média
-    const getMediaTitle = (mediaId: number) => {
-      const media = mediaList.value.find((m) => m.id === mediaId)
-      return media?.title || `Unknown ${props.type}`
-    }
+    getMediaTitle(mediaId: number): string {
+      const media = this.mediaList.find((m) => m.id === mediaId)
+      return media?.title || `Unknown ${this.type}`
+    },
 
     // Formátovanie dátumu
-    const formatDate = (dateString: string) => {
+    formatDate(dateString: string): string {
       return new Date(dateString).toLocaleDateString()
-    }
+    },
 
     // Načítanie recenzií
-    const fetchReviews = async () => {
-      loading.value = true
+    async fetchReviews() {
+      this.loading = true
       try {
         const { data, error } = await supabase
           .from('anime_reviews')
@@ -211,100 +219,80 @@ export default defineComponent({
             created_at,
             updated_at,
             type,
-            ${props.type === 'anime' ? 'anime' : 'manga'} (
+            ${this.type === 'anime' ? 'anime' : 'manga'} (
               id,
               title,
               image_url
             )
           `,
           )
-          .eq('type', props.type)
+          .eq('type', this.type)
           .order('created_at', { ascending: false })
 
         if (error) throw error
 
-        reviews.value = (data as unknown as ReviewResponse[])?.map((review) => ({
+        this.reviews = (data as unknown as ReviewResponse[])?.map((review) => ({
           ...review,
-          media: review[props.type]!,
+          media: review[this.type]!,
         })) as ReviewWithMedia[]
       } catch (error) {
         console.error('Error fetching reviews:', error)
       } finally {
-        loading.value = false
+        this.loading = false
       }
-    }
+    },
 
     // Odoslanie novej recenzie
-    const submitReview = async () => {
-      if (!isFormValid.value || !isAuthenticated.value) {
+    async submitReview() {
+      if (!this.isFormValid || !this.isAuthenticated) {
         console.log('Form validation failed:', {
-          isFormValid: isFormValid.value,
-          isAuthenticated: isAuthenticated.value,
+          isFormValid: this.isFormValid,
+          isAuthenticated: this.isAuthenticated,
         })
         return
       }
 
-      submitting.value = true
+      this.submitting = true
       console.log('Submitting review...')
 
       try {
         const {
           data: { user },
         } = await supabase.auth.getUser()
-        if (!user) {
-          console.error('No user found')
-          return
-        }
 
-        const { error } = await supabase
-          .from('anime_reviews')
-          .insert({
-            [props.type === 'anime' ? 'anime_id' : 'manga_id']: selectedMediaId.value,
-            user_id: user.id,
-            rating: newReview.value.rating,
-            content: newReview.value.content,
-            type: props.type,
-          })
-          .select()
+        if (!user) throw new Error('User not authenticated')
+
+        const { error } = await supabase.from('anime_reviews').insert({
+          type: this.type,
+          [`${this.type}_id`]: this.selectedMediaId,
+          user_id: user.id,
+          rating: this.newReview.rating,
+          content: this.newReview.content,
+        })
 
         if (error) throw error
 
-        // Reset formulára a obnovenie zoznamu
-        newReview.value = {
-          rating: 0,
-          content: '',
-          user_id: '',
-        }
-        selectedMediaId.value = null
-        await fetchReviews()
+        // Reset formulára
+        this.selectedMediaId = null
+        this.newReview.rating = 0
+        this.newReview.content = ''
+
+        // Obnovenie zoznamu recenzií
+        await this.fetchReviews()
       } catch (error) {
         console.error('Error submitting review:', error)
       } finally {
-        submitting.value = false
+        this.submitting = false
       }
-    }
-
-    // Inicializácia komponenty
-    onMounted(async () => {
-      await checkAuthStatus()
-      await fetchReviews()
-    })
-
-    return {
-      reviews,
-      loading,
-      submitting,
-      isAuthenticated,
-      selectedMediaId,
-      newReview,
-      isFormValid,
-      mediaList,
-      getMediaTitle,
-      formatDate,
-      submitReview,
-    }
+    },
   },
-})
+
+  // Životný cyklus komponentu
+  async created() {
+    await this.checkAuthStatus()
+    await this.fetchReviews()
+  },
+}
 </script>
 
 <style scoped>

@@ -29,7 +29,7 @@ export default defineComponent({
     MediaReviews,
   },
 
-  // Vlastnosti komponenty
+  // Vlastnosti komponentu
   props: {
     // Typ média (anime/manga)
     type: {

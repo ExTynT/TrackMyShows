@@ -59,8 +59,8 @@ export default {
   },
 
   computed: {
-    ...mapState(useAnimeStore, ['animeList']),
-    ...mapState(useMangaStore, ['mangaList']),
+    ...mapState(useAnimeStore, ['animeList']), // Mapovanie stavu z animeStore
+    ...mapState(useMangaStore, ['mangaList']), // Mapovanie stavu z mangaStore
 
     // Získanie dostupných žánrov z aktuálneho zoznamu
     availableGenres(): string[] {
@@ -117,13 +117,13 @@ export default {
       )
     },
 
-    // Obsluha zmeny typu média (anime/manga)
+    // Zmena typu média (anime/manga)
     handleMediaTypeChange(type: 'anime' | 'manga'): void {
       this.mediaType = type
       this.loadData()
     },
 
-    // Obsluha vyhľadávania
+    // Vyhľadávanie
     handleSearch({ query, genres }: { query: string; genres: string[] }): void {
       this.searchQuery = query
       this.selectedGenres = genres

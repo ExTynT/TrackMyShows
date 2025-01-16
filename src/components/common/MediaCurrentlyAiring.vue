@@ -58,63 +58,52 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
 import type { PropType } from 'vue'
 import type { Anime } from '../../types/anime'
 import type { Manga } from '../../types/manga'
 
-export default defineComponent({
+export default {
   name: 'MediaCurrentlyAiring',
 
-  // Vlastnosti komponentu
   props: {
-    // Typ média (anime/manga)
     type: {
-      type: String as () => 'anime' | 'manga',
+      type: String as PropType<'anime' | 'manga'>,
       required: true,
     },
-    // Zoznam médií
     mediaList: {
       type: Array as PropType<Anime[] | Manga[]>,
       required: true,
     },
   },
 
-  // Definícia emitovaných udalostí
   emits: ['navigate'],
 
-  // Nastavenie komponentu
-  setup(props) {
-    // Filtrovanie aktuálne vysielaných/publikovaných médií
-    const currentlyAiringMedia = computed(() => {
+  computed: {
+    currentlyAiringMedia(): (Anime | Manga)[] {
       console.log(
         'MediaList:',
-        props.mediaList.map((m) => ({ title: m.title, status: m.status })),
+        this.mediaList.map((m: Anime | Manga) => ({ title: m.title, status: m.status })),
       )
-      return props.mediaList
-        .filter((media) => {
-          if (props.type === 'anime') {
+      return this.mediaList
+        .filter((media: Anime | Manga) => {
+          if (this.type === 'anime') {
             return media.status === 'airing'
           }
           return media.status === 'ongoing'
         })
         .slice(0, 3)
-    })
+    },
+  },
 
-    // Získanie počtu epizód/kapitol
-    const getMediaCount = (media: Anime | Manga) => {
-      if (props.type === 'anime') {
+  methods: {
+    getMediaCount(media: Anime | Manga): number | undefined {
+      if (this.type === 'anime') {
         return (media as Anime).episodes
       }
       return (media as Manga).chapters
-    }
-
-    return {
-      currentlyAiringMedia,
-      getMediaCount,
-    }
+    },
   },
-})
+}
 </script>
 
 <style scoped>

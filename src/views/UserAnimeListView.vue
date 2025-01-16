@@ -349,7 +349,7 @@ export default defineComponent({
     },
   },
 
-  // Načítanie zoznamu pri vytvorení komponenty
+  // Načítanie zoznamu pri vytvorení komponentu
   async created() {
     try {
       await this.store.fetchUserList()
@@ -358,7 +358,7 @@ export default defineComponent({
     }
   },
 
-  // Kontrola a načítanie zoznamu pri pripojení komponenty
+  // Kontrola a načítanie zoznamu pri pripojení komponentu
   async mounted() {
     if (this.store.list.length === 0) {
       await this.store.fetchUserList()

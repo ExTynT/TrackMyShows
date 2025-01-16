@@ -51,7 +51,7 @@ export default {
     },
   },
 
-  // Definícia emitovaných udalostí
+  // Definícia emitovaných udalostí,vysiela rodičovi
   emits: ['click'],
 }
 </script>

@@ -60,71 +60,58 @@
 </template>
 
 <script lang="ts">
-// Importy potrebných závislostí
-import { defineComponent, computed } from 'vue'
 import type { PropType } from 'vue'
 import type { Anime } from '../../types/anime'
 import type { Manga } from '../../types/manga'
 
-export default defineComponent({
+export default {
   name: 'MediaUpcoming',
 
-  // Vlastnosti komponentu
   props: {
-    // Typ média (anime/manga)
     type: {
-      type: String as () => 'anime' | 'manga',
+      type: String as PropType<'anime' | 'manga'>,
       required: true,
     },
-    // Zoznam médií
     mediaList: {
       type: Array as PropType<Anime[] | Manga[]>,
       required: true,
     },
   },
 
-  // Definícia emitovaných udalostí
   emits: ['navigate'],
 
-  // Nastavenie komponentu
-  setup(props) {
-    // Kontrola typu média
-    const isAnime = (media: Anime | Manga): media is Anime => {
-      return props.type === 'anime'
-    }
+  methods: {
+    isAnime(media: Anime | Manga): media is Anime {
+      return this.type === 'anime'
+    },
 
-    // Filtrovanie pripravovaných médií
-    const upcomingMedia = computed(() => {
-      return props.mediaList
-        .filter((media) => {
-          if (isAnime(media)) {
+    getReleaseDate(media: Anime | Manga): string {
+      if (this.isAnime(media)) {
+        return media.year ? `Coming in ${media.year}` : 'Release year unknown'
+      }
+      return `Coming in ${media.year}`
+    },
+  },
+
+  computed: {
+    upcomingMedia(): (Anime | Manga)[] {
+      return this.mediaList
+        .filter((media: Anime | Manga) => {
+          if (this.isAnime(media)) {
             return media.status === 'upcoming' || media.year! >= new Date().getFullYear()
           }
           return media.status === 'hiatus'
         })
-        .sort((a, b) => {
-          if (isAnime(a) && isAnime(b)) {
+        .sort((a: Anime | Manga, b: Anime | Manga) => {
+          if (this.isAnime(a) && this.isAnime(b)) {
             return (a.year || 0) - (b.year || 0)
           }
           return (b as Manga).year - (a as Manga).year
         })
         .slice(0, 3)
-    })
-
-    // Formátovanie dátumu vydania
-    const getReleaseDate = (media: Anime | Manga) => {
-      if (isAnime(media)) {
-        return media.year ? `Coming in ${media.year}` : 'Release year unknown'
-      }
-      return `Coming in ${media.year}`
-    }
-
-    return {
-      upcomingMedia,
-      getReleaseDate,
-    }
+    },
   },
-})
+}
 </script>
 
 <style scoped>

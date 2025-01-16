@@ -54,7 +54,7 @@ export default defineComponent({
     NewsError,
   },
 
-  // Základný stav komponenty
+  // Základný stav komponentu
   data() {
     return {
       route: useRoute(),
@@ -62,7 +62,7 @@ export default defineComponent({
     }
   },
 
-  // Načítanie detailu článku pri vytvorení komponenty
+  // Načítanie detailu článku pri vytvorení komponentu
   async mounted() {
     const slug = this.route.params.slug as string
     await this.newsStore.fetchNewsDetail(slug)

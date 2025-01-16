@@ -42,7 +42,7 @@ import type { BlogPost } from '@/stores/blog'
 export default defineComponent({
   name: 'BlogContent',
 
-  // Vlastnosti komponenty
+  // Vlastnosti komponentu
   props: {
     // Blog post na zobrazenie
     blog: {

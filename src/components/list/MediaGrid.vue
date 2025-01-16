@@ -44,7 +44,7 @@ export default {
     MediaCard,
   },
 
-  // Vlastnosti komponenty
+  // Vlastnosti komponentu
   props: {
     // Zoznam položiek na zobrazenie
     items: {

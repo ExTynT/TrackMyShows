@@ -75,7 +75,7 @@ export const useMangaStore = defineStore('manga', () => {
 
       console.log('Basic manga data:', mangaData)
 
-      const { data: genreData, error: genreErr } = await supabase.from('manga_genre_relations')
+      const { data: genreData, error: genreErr } = await supabase.from('manga_genre_relations') // Destrukturovanie dát
         .select(`
           manga_id,
           manga_genres(*)

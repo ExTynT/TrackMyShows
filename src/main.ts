@@ -12,6 +12,7 @@ import * as directives from 'vuetify/directives'
 import App from './App.vue'
 import router from './router'
 
+// Vytvorenie Vuetify inštancie
 const vuetify = createVuetify({
   components,
   directives,

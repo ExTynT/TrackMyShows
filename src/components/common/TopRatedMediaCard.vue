@@ -55,52 +55,39 @@
 </template>
 
 <script lang="ts">
-// Importy potrebných závislostí
-import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 import type { Anime } from '../../types/anime'
 import type { Manga } from '../../types/manga'
 
-export default defineComponent({
+export default {
   name: 'TopRatedMediaCard',
 
-  // Vlastnosti komponentu
   props: {
-    // Typ média (anime/manga)
     type: {
-      type: String as () => 'anime' | 'manga',
+      type: String as PropType<'anime' | 'manga'>,
       required: true,
     },
-    // Údaje o médiu
     media: {
       type: Object as PropType<Anime | Manga>,
       required: true,
     },
-    // Poradie v rebríčku
     rank: {
       type: Number,
       required: true,
     },
   },
 
-  // Definícia emitovaných udalostí
   emits: ['click'],
 
-  // Nastavenie komponentu
-  setup(props) {
-    // Získanie počtu epizód/kapitol
-    const getMediaCount = (media: Anime | Manga) => {
-      if (props.type === 'anime') {
+  methods: {
+    getMediaCount(media: Anime | Manga): number | undefined {
+      if (this.type === 'anime') {
         return (media as Anime).episodes
       }
       return (media as Manga).chapters
-    }
-
-    return {
-      getMediaCount,
-    }
+    },
   },
-})
+}
 </script>
 
 <style scoped>

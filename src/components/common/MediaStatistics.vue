@@ -24,7 +24,7 @@ import type { Statistic } from '@/types/statistics'
 export default defineComponent({
   name: 'MediaStatistics',
 
-  // Vlastnosti komponenty
+  // Vlastnosti komponentu
   props: {
     // Typ média (anime/manga)
     type: {

@@ -124,13 +124,13 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
   // Aktualizácia položky v zozname
   async function updateListItem(
     animeId: number,
-    updates: Partial<Omit<UserAnimeListItem, 'id' | 'user_id' | 'anime_id' | 'anime'>>,
+    updates: Partial<Omit<UserAnimeListItem, 'id' | 'user_id' | 'anime_id' | 'anime'>>, // Vezme typ UserAnimeListItem a vynechá id, user_id, anime_id a anime a ostatné typy sú voliteľné
   ) {
     try {
       state.value.loading = true
       state.value.error = null
 
-      // Handle status changes
+      // Zmena statusu
       if (updates.status) {
         if (updates.status === 'completed') {
           updates.finish_date = new Date().toISOString()

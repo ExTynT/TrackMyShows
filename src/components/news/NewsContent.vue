@@ -49,7 +49,7 @@ interface NewsContentState {
 export default defineComponent({
   name: 'NewsContent',
 
-  // Vlastnosti komponenty
+  // Vlastnosti komponentu
   props: {
     // Údaje o novinke
     news: {
@@ -59,7 +59,7 @@ export default defineComponent({
     },
   },
 
-  // Lokálny stav komponenty
+  // Lokálny stav komponentu
   data(): NewsContentState {
     const store = useNewsStore()
     return {
@@ -73,7 +73,7 @@ export default defineComponent({
     }
   },
 
-  // Metódy komponenty
+  // Metódy komponentu
   methods: {
     // Formátovanie dátumu
     formatDate(dateString: string): string {
@@ -81,7 +81,7 @@ export default defineComponent({
     },
   },
 
-  // Načítanie detailu novinky po vytvorení komponenty
+  // Načítanie detailu novinky po vytvorení komponentu
   async mounted() {
     if (this.news?.id && !this.newsStore.news.find((n) => n.id === this.news?.id)) {
       await this.newsStore.fetchNewsDetail(this.news.id.toString())

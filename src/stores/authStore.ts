@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const isAuthenticated = computed(() => !!user.value)
+  const isAuthenticated = computed(() => !!user.value) // Vypočítaná vlastnosť na zistenie, či je používateľ prihlásený
 
   async function initialize() {
     const {

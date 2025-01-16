@@ -18,5 +18,4 @@ export interface MediaCarouselSlide {
   cover_image_url: string
 }
 
-// Use this type alias for backwards compatibility
 export type CarouselSlide = HomeCarouselSlide | MediaCarouselSlide

@@ -41,7 +41,7 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'BlogBreadcrumbs',
 
-  // Vlastnosti komponenty
+  // Vlastnosti komponentu
   props: {
     // Voliteľný názov blogu pre navigáciu
     blogTitle: {
