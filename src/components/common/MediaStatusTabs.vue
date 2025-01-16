@@ -1,4 +1,6 @@
+<!-- Záložky pre filtrovanie podľa stavu média -->
 <template>
+  <!-- Panel záložiek -->
   <v-tabs
     v-model="selectedTab"
     color="primary"
@@ -6,6 +8,7 @@
     class="media-status-tabs"
     show-arrows
   >
+    <!-- Jednotlivé záložky -->
     <v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
       <v-icon start>{{ tab.icon }}</v-icon>
       {{ tab.label }}
@@ -14,8 +17,10 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 
+// Rozhranie pre záložku
 export interface StatusTab {
   label: string
   value: string
@@ -25,20 +30,26 @@ export interface StatusTab {
 export default defineComponent({
   name: 'MediaStatusTabs',
 
+  // Vlastnosti komponentu
   props: {
+    // Aktuálne vybraná hodnota
     modelValue: {
       type: String,
       required: true,
     },
+    // Zoznam záložiek
     tabs: {
       type: Array as () => StatusTab[],
       required: true,
     },
   },
 
+  // Definícia emitovaných udalostí
   emits: ['update:modelValue'],
 
+  // Vypočítané vlastnosti
   computed: {
+    // Správa vybranej záložky
     selectedTab: {
       get() {
         return this.modelValue
@@ -49,7 +60,9 @@ export default defineComponent({
     },
   },
 
+  // Sledovanie zmien
   watch: {
+    // Kontrola platnosti vybranej hodnoty
     modelValue: {
       immediate: true,
       handler(newValue: string) {

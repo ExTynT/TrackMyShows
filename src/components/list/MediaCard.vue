@@ -1,4 +1,6 @@
+<!-- Karta pre zobrazenie média (anime/manga) -->
 <template>
+  <!-- Efekt pri prejdení myšou -->
   <v-hover v-slot="{ isHovering, props }">
     <v-card
       v-bind="props"
@@ -7,12 +9,14 @@
       class="transition-swing"
       @click="$emit('click', item.id)"
     >
+      <!-- Obrázok s titulkom -->
       <v-img :src="item.image_url" height="350" cover class="align-end">
         <v-card-title class="text-white bg-black bg-opacity-50 text-truncate">
           {{ item.title }}
         </v-card-title>
       </v-img>
 
+      <!-- Zoznam žánrov -->
       <v-card-text>
         <div class="d-flex flex-wrap gap-1 mt-2">
           <v-chip
@@ -31,19 +35,23 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných typov
 import type { Anime } from '@/types/anime'
 import type { Manga } from '@/types/manga'
 
 export default {
   name: 'MediaCard',
 
+  // Vlastnosti komponentu
   props: {
+    // Položka média (anime/manga)
     item: {
       type: Object as () => Anime | Manga,
       required: true,
     },
   },
 
+  // Definícia emitovaných udalostí
   emits: ['click'],
 }
 </script>

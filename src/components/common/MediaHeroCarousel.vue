@@ -1,20 +1,28 @@
+<!-- Hlavný carousel pre zobrazenie populárnych médií -->
 <template>
   <section class="carousel-section">
+    <!-- Načítavací indikátor -->
     <v-progress-circular
       v-if="loading"
       indeterminate
       color="primary"
       class="loader"
     ></v-progress-circular>
+    <!-- Carousel s automatickým prehrávaním -->
     <v-carousel v-else cycle height="600" hide-delimiter-background show-arrows="hover">
+      <!-- Jednotlivé slidy -->
       <v-carousel-item v-for="slide in slides" :key="slide.id">
+        <!-- Obrázok na pozadí -->
         <v-img :src="slide.cover_image_url" height="600" cover>
+          <!-- Obsah slidu -->
           <div class="carousel-content">
             <v-container>
               <v-row align="center" style="height: 100%">
                 <v-col cols="12" md="6">
+                  <!-- Názov a popis -->
                   <h2 class="carousel-title">{{ slide.title }}</h2>
                   <p class="carousel-description">{{ slide.description }}</p>
+                  <!-- Hodnotenie -->
                   <div class="d-flex align-center mb-4">
                     <v-rating
                       v-model="slide.rating"
@@ -25,6 +33,7 @@
                     ></v-rating>
                     <span class="text-white ms-2">{{ slide.rating }}/5</span>
                   </div>
+                  <!-- Tlačidlo akcie -->
                   <v-btn
                     color="primary"
                     size="large"
@@ -45,32 +54,40 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import type { MediaCarouselSlide } from '@/types/carousel'
 
 export default defineComponent({
   name: 'MediaHeroCarousel',
 
+  // Vlastnosti komponentu
   props: {
+    // Typ média (anime/manga)
     type: {
       type: String as () => 'anime' | 'manga',
       required: true,
       validator: (value: string) => ['anime', 'manga'].includes(value),
     },
+    // Slidy pre carousel
     slides: {
       type: Array as () => MediaCarouselSlide[],
       required: true,
     },
+    // Stav načítavania
     loading: {
       type: Boolean,
       default: false,
     },
   },
 
+  // Vypočítané vlastnosti
   computed: {
+    // Ikona pre tlačidlo akcie
     actionIcon(): string {
       return this.type === 'anime' ? 'mdi-play' : 'mdi-book-open-variant'
     },
+    // Text pre tlačidlo akcie
     actionText(): string {
       return this.type === 'anime' ? 'Watch Now' : 'Read Now'
     },

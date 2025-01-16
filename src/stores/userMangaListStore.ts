@@ -3,12 +3,15 @@ import { ref } from 'vue'
 import { supabase } from '@/supabase'
 import type { UserMangaListItem, UserMangaStatus } from '@/types/manga'
 
+// Store pre správu zoznamu mangy používateľa
 export const useUserMangaListStore = defineStore('userMangaList', () => {
+  // Stavové premenné
   const list = ref<UserMangaListItem[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
   const lastUpdated = ref<Date | null>(null)
 
+  // Pridanie novej mangy do zoznamu
   async function addToList(mangaId: number, status: UserMangaStatus, chaptersRead: number = 0) {
     loading.value = true
     error.value = null
@@ -29,6 +32,7 @@ export const useUserMangaListStore = defineStore('userMangaList', () => {
     }
   }
 
+  // Načítanie zoznamu mangy používateľa
   async function fetchUserList() {
     loading.value = true
     error.value = null
@@ -77,6 +81,7 @@ export const useUserMangaListStore = defineStore('userMangaList', () => {
     }
   }
 
+  // Export stavových premenných a funkcií
   return {
     list,
     loading,

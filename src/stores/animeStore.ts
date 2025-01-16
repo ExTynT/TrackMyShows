@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { supabase } from '../lib/supabase'
 import type { Genre, Studio, UserAnimeListItem, AnimeStatus, AnimeSeason } from '@/types/anime'
 
+// Rozhranie pre anime dáta
 export interface Anime {
   id: number
   title: string
@@ -39,7 +40,7 @@ export interface Anime {
 }
 
 export const useAnimeStore = defineStore('anime', () => {
-  // State
+  // Stavové premenné
   const animeList = ref<Anime[]>([])
   const currentAnime = ref<Anime | null>(null)
   const genres = ref<Genre[]>([])
@@ -48,7 +49,7 @@ export const useAnimeStore = defineStore('anime', () => {
   const error = ref<string | null>(null)
   const userAnimeList = ref<UserAnimeListItem[]>([])
 
-  // Getters
+  // Gettery pre filtrovanie a zoradenie anime
   const airingAnime = computed(() => animeList.value.filter((anime) => anime.status === 'airing'))
 
   const upcomingAnime = computed(() =>
@@ -66,12 +67,13 @@ export const useAnimeStore = defineStore('anime', () => {
       .slice(0, 10),
   )
 
-  // Actions
+  // Akcie pre prácu s databázou
   async function fetchAnimeList() {
     try {
       loading.value = true
       error.value = null
 
+      // Načítanie zoznamu anime s ich žánrami a štúdiami
       const { data, error: err } = await supabase
         .from('anime')
         .select(
@@ -95,6 +97,7 @@ export const useAnimeStore = defineStore('anime', () => {
     }
   }
 
+  // Načítanie detailov konkrétneho anime
   async function fetchAnimeDetails(id: number) {
     try {
       loading.value = true
@@ -124,6 +127,7 @@ export const useAnimeStore = defineStore('anime', () => {
     }
   }
 
+  // Načítanie všetkých žánrov
   async function fetchGenres() {
     try {
       const { data, error: err } = await supabase.from('genres').select('*').order('name')
@@ -136,6 +140,7 @@ export const useAnimeStore = defineStore('anime', () => {
     }
   }
 
+  // Načítanie všetkých štúdií
   async function fetchStudios() {
     try {
       const { data, error: err } = await supabase.from('studios').select('*').order('name')
@@ -148,6 +153,7 @@ export const useAnimeStore = defineStore('anime', () => {
     }
   }
 
+  // Načítanie zoznamu anime používateľa
   async function fetchUserAnimeList(userId: string) {
     try {
       const { data, error: err } = await supabase
@@ -168,6 +174,7 @@ export const useAnimeStore = defineStore('anime', () => {
     }
   }
 
+  // Aktualizácia stavu sledovania anime používateľom
   async function updateUserAnimeStatus(
     animeId: number,
     status: UserAnimeListItem['status'],
@@ -187,7 +194,7 @@ export const useAnimeStore = defineStore('anime', () => {
 
       if (err) throw err
 
-      // Refresh user's anime list
+      // Obnovenie zoznamu anime používateľa
       await fetchUserAnimeList(userId)
     } catch (err) {
       console.error('Error updating anime status:', err)
@@ -195,8 +202,9 @@ export const useAnimeStore = defineStore('anime', () => {
     }
   }
 
+  // Export stavových premenných a funkcií
   return {
-    // State
+    // Stavové premenné
     animeList,
     currentAnime,
     genres,
@@ -205,13 +213,13 @@ export const useAnimeStore = defineStore('anime', () => {
     error,
     userAnimeList,
 
-    // Getters
+    // Gettery
     airingAnime,
     upcomingAnime,
     popularAnime,
     topRatedAnime,
 
-    // Actions
+    // Akcie
     fetchAnimeList,
     fetchAnimeDetails,
     fetchGenres,

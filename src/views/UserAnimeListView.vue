@@ -1,7 +1,7 @@
 <template>
   <div class="user-anime-list">
     <v-container class="py-12">
-      <!-- Header Section -->
+      <!-- Hlavička so základnými informáciami -->
       <div class="header-section mb-12">
         <div class="d-flex align-center justify-space-between mb-3">
           <h1 class="text-h3 font-weight-bold">My Anime List</h1>
@@ -19,12 +19,12 @@
         <div class="text-subtitle-1 text-grey">Track and manage your anime watching progress</div>
       </div>
 
-      <!-- Status Tabs -->
+      <!-- Záložky pre filtrovanie podľa stavu -->
       <v-card class="mb-8" variant="flat">
         <MediaStatusTabs v-model="selectedStatus" :tabs="tabs" />
       </v-card>
 
-      <!-- Statistics -->
+      <!-- Štatistiky sledovania -->
       <v-card class="mb-8" variant="flat">
         <MediaStatistics
           type="anime"
@@ -35,14 +35,14 @@
         />
       </v-card>
 
-      <!-- Loading State -->
+      <!-- Načítavací stav -->
       <v-row v-if="store.loading">
         <v-col cols="12" class="d-flex justify-center align-center" style="min-height: 400px">
           <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
         </v-col>
       </v-row>
 
-      <!-- Content -->
+      <!-- Zoznam anime -->
       <template v-else>
         <v-row v-if="displayedAnimeList.length > 0">
           <v-col v-for="item in displayedAnimeList" :key="item.id" cols="12">
@@ -54,7 +54,7 @@
                 class="transition-swing"
               >
                 <div class="d-flex">
-                  <!-- Image Section -->
+                  <!-- Obrázok anime -->
                   <div
                     class="media-image-container"
                     style="cursor: pointer"
@@ -69,9 +69,9 @@
                     ></v-img>
                   </div>
 
-                  <!-- Content Section -->
+                  <!-- Detaily anime -->
                   <div class="flex-grow-1 pa-4">
-                    <!-- Title and Info -->
+                    <!-- Názov a poznámky -->
                     <div class="d-flex flex-column">
                       <h3 class="text-h5 font-weight-bold mb-2">{{ item.anime.title }}</h3>
                       <v-textarea
@@ -86,7 +86,7 @@
                         @change="updateNotes(item)"
                       ></v-textarea>
 
-                      <!-- Genres -->
+                      <!-- Žánre -->
                       <div class="mb-4">
                         <v-chip
                           v-for="genre in item.anime.genres"
@@ -99,7 +99,7 @@
                         </v-chip>
                       </div>
 
-                      <!-- Rating -->
+                      <!-- Hodnotenie -->
                       <div class="d-flex align-center mb-4">
                         <v-rating
                           v-model="item.rating"
@@ -114,7 +114,7 @@
                         >
                       </div>
 
-                      <!-- Episode Controls -->
+                      <!-- Ovládanie epizód -->
                       <div class="d-flex align-center">
                         <v-btn
                           icon="mdi-minus"
@@ -137,7 +137,7 @@
                           @click="updateEpisodes(item, 1)"
                         ></v-btn>
 
-                        <!-- Status and Favorite Menu -->
+                        <!-- Menu pre stav a obľúbené -->
                         <v-menu>
                           <template v-slot:activator="{ props }">
                             <v-btn
@@ -196,7 +196,7 @@
                           </v-list>
                         </v-menu>
 
-                        <!-- Remove Button -->
+                        <!-- Tlačidlo pre odstránenie -->
                         <v-spacer></v-spacer>
                         <v-btn
                           color="error"
@@ -215,7 +215,7 @@
           </v-col>
         </v-row>
 
-        <!-- Empty State -->
+        <!-- Prázdny stav -->
         <v-row v-else>
           <v-col cols="12">
             <v-card class="pa-12 text-center" variant="flat">
@@ -236,6 +236,7 @@
 </template>
 
 <script lang="ts">
+// Importy komponentov a závislostí
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserAnimeListStore } from '@/stores/userAnimeListStore'
@@ -247,11 +248,13 @@ import type { UserAnimeListItem, UserAnimeStatus } from '@/types/anime'
 export default defineComponent({
   name: 'UserAnimeListView',
 
+  // Registrácia komponentov
   components: {
     MediaStatusTabs,
     MediaStatistics,
   },
 
+  // Základný stav komponenty
   data() {
     return {
       store: useUserAnimeListStore(),
@@ -270,6 +273,7 @@ export default defineComponent({
   },
 
   computed: {
+    // Filtrovanie zoznamu podľa vybraného stavu
     displayedAnimeList() {
       if (this.selectedStatus === 'favorites') {
         return this.store.list.filter((item) => item.favorite)
@@ -277,20 +281,24 @@ export default defineComponent({
       return this.store.list.filter((item) => item.status === this.selectedStatus)
     },
 
+    // Celkový počet anime
     totalAnime() {
       return this.store.list.length
     },
 
+    // Celkový počet pozretých epizód
     totalEpisodesWatched() {
       return this.store.list.reduce((sum, item) => sum + item.episodes_watched, 0)
     },
 
+    // Priemerné hodnotenie
     averageRating() {
       const ratedAnime = this.store.list.filter((item) => item.rating)
       if (!ratedAnime.length) return 0
       return ratedAnime.reduce((sum, item) => sum + (item.rating || 0), 0) / ratedAnime.length
     },
 
+    // Percento dokončených anime
     completionRate() {
       const completed = this.store.list.filter((item) => item.status === 'completed').length
       return this.totalAnime ? (completed / this.totalAnime) * 100 : 0
@@ -298,43 +306,50 @@ export default defineComponent({
   },
 
   methods: {
+    // Aktualizácia počtu pozretých epizód
     async updateEpisodes(item: UserAnimeListItem, change: number) {
       const newCount = item.episodes_watched + change
       await this.actions.updateEpisodes(item.anime_id, newCount)
 
-      // Auto-complete when reaching last episode
+      // Automatické dokončenie pri dosiahnutí poslednej epizódy
       if (newCount === item.anime.episodes && item.status !== 'completed') {
         await this.actions.updateStatus(item.anime_id, 'completed')
       }
-      // Change back to watching when decreasing from max episodes
+      // Zmena späť na sledovanie pri znížení počtu epizód
       else if (newCount < item.anime.episodes && item.status === 'completed') {
         await this.actions.updateStatus(item.anime_id, 'watching')
       }
     },
 
+    // Aktualizácia poznámok
     async updateNotes(item: UserAnimeListItem) {
       await this.actions.updateNotes(item.anime_id, item.notes || '')
     },
 
+    // Aktualizácia hodnotenia
     async updateRating(item: UserAnimeListItem, rating: number) {
       await this.actions.updateRating(item.anime_id, rating)
     },
 
+    // Odstránenie anime zo zoznamu
     async removeFromList(item: UserAnimeListItem) {
       if (confirm('Are you sure you want to remove this anime from your list?')) {
         await this.actions.removeFromList(item.anime_id)
       }
     },
 
+    // Aktualizácia stavu sledovania
     async updateStatus(item: UserAnimeListItem, status: UserAnimeStatus) {
       await this.actions.updateStatus(item.anime_id, status)
     },
 
+    // Prepnutie obľúbeného stavu
     async toggleFavorite(item: UserAnimeListItem) {
       await this.actions.toggleFavorite(item.anime_id)
     },
   },
 
+  // Načítanie zoznamu pri vytvorení komponenty
   async created() {
     try {
       await this.store.fetchUserList()
@@ -343,6 +358,7 @@ export default defineComponent({
     }
   },
 
+  // Kontrola a načítanie zoznamu pri pripojení komponenty
   async mounted() {
     if (this.store.list.length === 0) {
       await this.store.fetchUserList()

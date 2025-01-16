@@ -1,18 +1,23 @@
+<!-- Karta pre najlepšie hodnotené médiá -->
 <template>
   <v-card class="top-rated-card" @click="$emit('click')">
     <v-row no-gutters>
+      <!-- Odznak s poradím -->
       <v-col cols="auto">
         <div class="rank-badge">
           <span class="text-h5">#{{ rank }}</span>
         </div>
       </v-col>
 
+      <!-- Obrázok média -->
       <v-col cols="auto">
         <v-img :src="media.image_url" width="120" height="180" cover></v-img>
       </v-col>
 
+      <!-- Obsah karty -->
       <v-col>
         <v-card-text class="d-flex flex-column h-100">
+          <!-- Názov a hodnotenie -->
           <div>
             <h3 class="text-h6 mb-2">{{ media.title }}</h3>
             <div class="d-flex align-center mb-2">
@@ -32,8 +37,10 @@
             </div>
           </div>
 
+          <!-- Popis -->
           <p class="text-body-2 text-grey-darken-1 mb-2">{{ media.synopsis }}</p>
 
+          <!-- Detaily o počte epizód/kapitol a stave -->
           <div class="mt-auto">
             <p class="text-caption text-grey-darken-1 mb-1">
               {{ type === 'anime' ? 'Episodes' : 'Chapters' }}:
@@ -48,6 +55,7 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 import type { Anime } from '../../types/anime'
@@ -56,24 +64,31 @@ import type { Manga } from '../../types/manga'
 export default defineComponent({
   name: 'TopRatedMediaCard',
 
+  // Vlastnosti komponentu
   props: {
+    // Typ média (anime/manga)
     type: {
       type: String as () => 'anime' | 'manga',
       required: true,
     },
+    // Údaje o médiu
     media: {
       type: Object as PropType<Anime | Manga>,
       required: true,
     },
+    // Poradie v rebríčku
     rank: {
       type: Number,
       required: true,
     },
   },
 
+  // Definícia emitovaných udalostí
   emits: ['click'],
 
+  // Nastavenie komponentu
   setup(props) {
+    // Získanie počtu epizód/kapitol
     const getMediaCount = (media: Anime | Manga) => {
       if (props.type === 'anime') {
         return (media as Anime).episodes

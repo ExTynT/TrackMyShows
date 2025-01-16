@@ -1,13 +1,17 @@
+<!-- Hlavná sekcia pre najnovšie správy -->
 <template>
   <section class="news-section">
     <h2 class="section-title">Latest News</h2>
+    <!-- Načítavací indikátor -->
     <v-progress-circular
       v-if="loading"
       indeterminate
       color="primary"
       class="loader"
     ></v-progress-circular>
+    <!-- Mriežka s novinkami -->
     <div v-else class="news-grid">
+      <!-- Karta s novinkou -->
       <v-card
         v-for="news in latestNews"
         :key="news.id"
@@ -15,9 +19,11 @@
         class="news-card"
         elevation="0"
       >
+        <!-- Obrázok novinky -->
         <div class="news-image">
           <v-img :src="news.image_url" height="180" cover></v-img>
         </div>
+        <!-- Obsah novinky -->
         <div class="news-content">
           <h3 class="news-title">{{ news.title }}</h3>
           <p class="news-description">{{ news.description }}</p>
@@ -31,6 +37,7 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import { useNewsStore } from '../stores/news'
 import type { NewsItem } from '../types/news'
@@ -38,6 +45,7 @@ import type { NewsItem } from '../types/news'
 export default defineComponent({
   name: 'LatestNews',
 
+  // Základný stav komponentu
   data() {
     const store = useNewsStore()
     return {
@@ -46,6 +54,7 @@ export default defineComponent({
     }
   },
 
+  // Výpočet najnovších správ (max 4)
   computed: {
     latestNews(): NewsItem[] {
       return this.newsStore.news.slice(0, 4)
@@ -53,6 +62,7 @@ export default defineComponent({
   },
 
   methods: {
+    // Formátovanie dátumu do čitateľnej podoby
     formatDate(dateString: string): string {
       const options: Intl.DateTimeFormatOptions = {
         year: 'numeric',
@@ -62,6 +72,7 @@ export default defineComponent({
       return new Date(dateString).toLocaleDateString('en-US', options)
     },
 
+    // Načítanie noviniek z databázy
     async fetchData() {
       this.loading = true
       try {
@@ -74,6 +85,7 @@ export default defineComponent({
     },
   },
 
+  // Načítanie dát pri vytvorení komponentu
   mounted() {
     this.fetchData()
   },

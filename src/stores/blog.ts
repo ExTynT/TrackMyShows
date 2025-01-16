@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabase'
 
+// Rozhranie pre blogový príspevok
 export interface BlogPost {
   id: number
   title: string
@@ -16,6 +17,7 @@ export interface BlogPost {
 }
 
 export const useBlogStore = defineStore('blog', {
+  // Stavové premenné
   state: () => ({
     posts: [] as BlogPost[],
     currentPost: null as BlogPost | null,
@@ -23,12 +25,15 @@ export const useBlogStore = defineStore('blog', {
     error: null as string | null,
   }),
 
+  // Gettery pre filtrovanie príspevkov
   getters: {
     blogs: (state) => state.posts.filter((post) => post.category === 'blog'),
     reviews: (state) => state.posts.filter((post) => post.category === 'review'),
   },
 
+  // Akcie pre prácu s databázou
   actions: {
+    // Načítanie všetkých príspevkov
     async fetchPosts() {
       this.loading = true
       this.error = null
@@ -48,6 +53,7 @@ export const useBlogStore = defineStore('blog', {
       }
     },
 
+    // Načítanie detailu príspevku
     async fetchPostDetail(id: number) {
       this.loading = true
       this.error = null
@@ -65,6 +71,7 @@ export const useBlogStore = defineStore('blog', {
       }
     },
 
+    // Pridanie nového príspevku
     async addPost(post: Omit<BlogPost, 'id'>) {
       const { data, error } = await supabase.from('blog_posts').insert([post]).select()
 
@@ -72,6 +79,7 @@ export const useBlogStore = defineStore('blog', {
       return data[0]
     },
 
+    // Aktualizácia existujúceho príspevku
     async updatePost(id: number, updates: Partial<BlogPost>) {
       const { data, error } = await supabase
         .from('blog_posts')
@@ -83,6 +91,7 @@ export const useBlogStore = defineStore('blog', {
       return data[0]
     },
 
+    // Odstránenie príspevku
     async removePost(id: number) {
       const { error } = await supabase.from('blog_posts').delete().eq('id', id)
 

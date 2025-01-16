@@ -1,5 +1,7 @@
+<!-- Hlavný obsah blogu -->
 <template>
   <v-card v-if="blog" class="blog-content pa-6" elevation="0" rounded="lg">
+    <!-- Hlavný obrázok blogu -->
     <v-img
       v-if="blog.image_url"
       :src="blog.image_url"
@@ -9,8 +11,10 @@
       cover
     ></v-img>
 
+    <!-- Nadpis blogu -->
     <h1 class="text-h4 font-weight-bold mb-4 primary--text">{{ blog.title }}</h1>
 
+    <!-- Informácie o autorovi a dátume -->
     <div class="d-flex align-center mb-6">
       <v-icon icon="mdi-account" class="mr-2" color="grey"></v-icon>
       <span class="text-grey mr-6">{{ blog.author }}</span>
@@ -20,21 +24,27 @@
 
     <v-divider class="mb-6"></v-divider>
 
+    <!-- Krátky popis blogu -->
     <div class="text-subtitle-1 mb-4 text-grey-darken-3">{{ blog.content }}</div>
 
+    <!-- Celý obsah blogu -->
     <div class="blog-content__body text-body-1" v-html="blog.full_content"></div>
   </v-card>
+  <!-- Načítavací stav -->
   <v-skeleton-loader v-else type="article" class="mt-4"></v-skeleton-loader>
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import type { BlogPost } from '@/stores/blog'
 
 export default defineComponent({
   name: 'BlogContent',
 
+  // Vlastnosti komponenty
   props: {
+    // Blog post na zobrazenie
     blog: {
       type: Object as () => BlogPost | null,
       required: false,
@@ -43,6 +53,7 @@ export default defineComponent({
   },
 
   methods: {
+    // Formátovanie dátumu do čitateľnej podoby
     formatDate(dateString: string): string {
       const options: Intl.DateTimeFormatOptions = {
         year: 'numeric',

@@ -1,10 +1,13 @@
+<!-- Formulár pre registráciu -->
 <template>
   <v-form @submit.prevent="handleSubmit" class="sign-up-form">
     <v-card class="pa-4">
+      <!-- Nadpis formulára -->
       <div class="text-center mb-4">
         <h2 class="text-h4">Sign Up</h2>
       </div>
 
+      <!-- Vstupné pole pre email -->
       <v-text-field
         v-model="email"
         label="Email"
@@ -13,6 +16,7 @@
         :rules="emailRules"
       ></v-text-field>
 
+      <!-- Vstupné pole pre používateľské meno -->
       <v-text-field
         v-model="username"
         label="Username"
@@ -20,6 +24,7 @@
         :rules="usernameRules"
       ></v-text-field>
 
+      <!-- Vstupné pole pre heslo -->
       <v-text-field
         v-model="password"
         label="Password"
@@ -28,6 +33,7 @@
         :rules="passwordRules"
       ></v-text-field>
 
+      <!-- Vstupné pole pre potvrdenie hesla -->
       <v-text-field
         v-model="confirmPassword"
         label="Confirm Password"
@@ -36,6 +42,7 @@
         :rules="confirmPasswordRules"
       ></v-text-field>
 
+      <!-- Tlačidlo pre registráciu -->
       <v-btn
         type="submit"
         color="primary"
@@ -47,6 +54,7 @@
         Sign Up
       </v-btn>
 
+      <!-- Odkaz na prihlásenie -->
       <div class="text-center mt-4">
         <span class="text-grey">Already have an account?</span>
         <v-btn
@@ -64,11 +72,13 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 import type { Router } from 'vue-router'
 
+// Rozhranie pre stav formulára
 interface SignUpFormState {
   router: Router
   authStore: ReturnType<typeof useAuthStore>
@@ -84,6 +94,7 @@ interface SignUpFormState {
 export default defineComponent({
   name: 'SignUpForm',
 
+  // Základný stav komponentu
   data(): SignUpFormState {
     const store = useAuthStore()
     return {
@@ -93,14 +104,17 @@ export default defineComponent({
       username: '',
       password: '',
       confirmPassword: '',
+      // Pravidlá pre validáciu emailu
       emailRules: [
         (v: string) => !!v || 'Email is required',
         (v: string) => /.+@.+\..+/.test(v) || 'Email must be valid',
       ],
+      // Pravidlá pre validáciu používateľského mena
       usernameRules: [
         (v: string) => !!v || 'Username is required',
         (v: string) => v.length >= 3 || 'Username must be at least 3 characters',
       ],
+      // Pravidlá pre validáciu hesla
       passwordRules: [
         (v: string) => !!v || 'Password is required',
         (v: string) => v.length >= 6 || 'Password must be at least 6 characters',
@@ -109,12 +123,14 @@ export default defineComponent({
   },
 
   computed: {
+    // Pravidlá pre validáciu potvrdenia hesla
     confirmPasswordRules(): ((v: string) => boolean | string)[] {
       return [
         (v: string) => !!v || 'Please confirm your password',
         (v: string) => v === this.password || 'Passwords must match',
       ]
     },
+    // Kontrola platnosti formulára
     isValid(): boolean {
       return !!(
         this.email &&
@@ -131,6 +147,7 @@ export default defineComponent({
   },
 
   methods: {
+    // Spracovanie odoslania formulára
     async handleSubmit(): Promise<void> {
       if (!this.isValid) return
 

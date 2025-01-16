@@ -1,7 +1,7 @@
 <template>
   <div class="news-detail">
     <v-container>
-      <!-- Loading State -->
+      <!-- Načítavací stav -->
       <div
         v-if="newsStore.loading"
         class="d-flex justify-center align-center"
@@ -10,14 +10,14 @@
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
       </div>
 
-      <!-- Error State -->
+      <!-- Chybový stav -->
       <news-error
         v-else-if="newsStore.error"
         :message="newsStore.error"
         description="There was an error loading the news article. Please try again later."
       />
 
-      <!-- Content -->
+      <!-- Obsah článku -->
       <template v-else-if="newsStore.currentNews">
         <news-breadcrumbs :news-title="newsStore.currentNews.title" />
         <news-content :news="newsStore.currentNews" />
@@ -27,13 +27,14 @@
         />
       </template>
 
-      <!-- Not Found -->
+      <!-- Článok nenájdený -->
       <news-error v-else />
     </v-container>
   </div>
 </template>
 
 <script lang="ts">
+// Importy komponentov a závislostí
 import { defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useNewsStore } from '@/stores/news'
@@ -45,6 +46,7 @@ import NewsError from '@/components/news/NewsError.vue'
 export default defineComponent({
   name: 'NewsDetailView',
 
+  // Registrácia komponentov
   components: {
     NewsBreadcrumbs,
     NewsContent,
@@ -52,6 +54,7 @@ export default defineComponent({
     NewsError,
   },
 
+  // Základný stav komponenty
   data() {
     return {
       route: useRoute(),
@@ -59,6 +62,7 @@ export default defineComponent({
     }
   },
 
+  // Načítanie detailu článku pri vytvorení komponenty
   async mounted() {
     const slug = this.route.params.slug as string
     await this.newsStore.fetchNewsDetail(slug)

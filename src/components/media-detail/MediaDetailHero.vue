@@ -6,15 +6,17 @@
     show-arrows="hover"
     class="hero-carousel"
   >
-    <!-- Main Info Slide -->
+    <!-- Hlavné informácie -->
     <v-carousel-item>
       <v-img :src="media.image_url" height="600" cover>
         <div class="hero-overlay">
           <v-container>
             <v-row>
+              <!-- Plagát média -->
               <v-col cols="12" md="3">
                 <v-img :src="media.image_url" height="400" class="poster-image" cover></v-img>
               </v-col>
+              <!-- Základné informácie -->
               <v-col cols="12" md="9" class="d-flex flex-column justify-center">
                 <h1 class="text-h2 font-weight-bold text-white mb-4">
                   {{ media.title }}
@@ -22,6 +24,7 @@
                 <p class="text-h6 text-white mb-4" v-if="media.japanese_title">
                   {{ media.japanese_title }}
                 </p>
+                <!-- Hodnotenie -->
                 <div class="d-flex align-center mb-6">
                   <v-rating
                     :model-value="media.rating"
@@ -32,6 +35,7 @@
                   ></v-rating>
                   <span class="text-white ms-2">{{ media.rating }}/5</span>
                 </div>
+                <!-- Popis -->
                 <p class="text-white text-body-1">{{ media.synopsis }}</p>
               </v-col>
             </v-row>
@@ -40,7 +44,7 @@
       </v-img>
     </v-carousel-item>
 
-    <!-- Credits Slide -->
+    <!-- Informácie o tvorcoch -->
     <v-carousel-item>
       <v-img :src="media.image_url" height="600" cover>
         <div class="hero-overlay">
@@ -48,6 +52,7 @@
             <v-row>
               <v-col cols="12" class="d-flex flex-column justify-center text-center">
                 <h2 class="text-h3 font-weight-bold text-white mb-6">{{ creditTitle }}</h2>
+                <!-- Zoznam tvorcov -->
                 <div class="d-flex justify-center flex-wrap gap-4 mb-6">
                   <v-chip
                     v-for="credit in credits"
@@ -69,6 +74,7 @@
                     {{ credit.name }}
                   </v-chip>
                 </div>
+                <!-- Zoznam žánrov -->
                 <div class="d-flex justify-center flex-wrap gap-2">
                   <v-chip v-for="genre in genres" :key="genre.id" variant="outlined" class="ma-1">
                     {{ genre.name }}
@@ -81,7 +87,7 @@
       </v-img>
     </v-carousel-item>
 
-    <!-- Stats Slide -->
+    <!-- Štatistiky -->
     <v-carousel-item>
       <v-img :src="media.image_url" height="600" cover>
         <div class="hero-overlay">
@@ -90,6 +96,7 @@
               <v-col cols="12" class="d-flex flex-column justify-center text-center">
                 <h2 class="text-h3 font-weight-bold text-white mb-6">Quick Stats</h2>
                 <v-row justify="center">
+                  <!-- Počet epizód/kapitol -->
                   <v-col cols="12" sm="4">
                     <div class="stat-card pa-4 rounded-lg">
                       <v-icon size="48" color="primary" class="mb-2">
@@ -101,6 +108,7 @@
                       <p class="text-body-1">{{ countLabel }}</p>
                     </div>
                   </v-col>
+                  <!-- Celkové hodnotenie -->
                   <v-col cols="12" sm="4">
                     <div class="stat-card pa-4 rounded-lg">
                       <v-icon size="48" color="primary" class="mb-2">mdi-star</v-icon>
@@ -108,6 +116,7 @@
                       <p class="text-body-1">Rating</p>
                     </div>
                   </v-col>
+                  <!-- Sezóna/Stav a rok -->
                   <v-col cols="12" sm="4">
                     <div class="stat-card pa-4 rounded-lg">
                       <v-icon size="48" color="primary" class="mb-2">mdi-calendar</v-icon>
@@ -128,6 +137,7 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 import type { Media, Credit } from '@/types/media'
@@ -135,36 +145,46 @@ import type { Media, Credit } from '@/types/media'
 export default defineComponent({
   name: 'MediaDetailHero',
 
+  // Vlastnosti komponentu
   props: {
+    // Typ média (anime/manga)
     type: {
       type: String as PropType<'anime' | 'manga'>,
       required: true,
     },
+    // Údaje o médiu
     media: {
       type: Object as PropType<Media>,
       required: true,
     },
+    // Zoznam tvorcov
     credits: {
       type: Array as PropType<Credit[]>,
       required: true,
     },
   },
 
+  // Vypočítané vlastnosti
   computed: {
+    // Nadpis pre sekciu tvorcov
     creditTitle(): string {
       return this.type === 'anime' ? 'Studio Spotlight' : 'Author Spotlight'
     },
+    // Text pre počet epizód/kapitol
     countLabel(): string {
       return this.type === 'anime' ? 'Episodes' : 'Chapters'
     },
+    // Počet epizód/kapitol
     contentCount(): string {
       return this.type === 'anime'
         ? String(this.media.episodes || '?')
         : String(this.media.chapters || '?')
     },
+    // Sezóna alebo stav
     seasonOrStatus(): string {
       return this.type === 'anime' ? this.media.season || '' : this.media.status || ''
     },
+    // Zoznam žánrov
     genres(): Array<{ id: number; name: string }> {
       return this.media.genres
     },

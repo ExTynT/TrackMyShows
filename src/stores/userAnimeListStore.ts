@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
 import type { UserAnimeStatus, UserAnimeListItem } from '@/types/anime'
 
-// State interface for better type safety
+// Rozhranie pre stav zoznamu anime
 interface State {
   list: UserAnimeListItem[]
   loading: boolean
@@ -11,8 +11,9 @@ interface State {
   lastUpdated: Date | null
 }
 
+// Store pre správu zoznamu anime používateľa
 export const useUserAnimeListStore = defineStore('userAnimeList', () => {
-  // State with proper typing
+  // Základný stav
   const state = ref<State>({
     list: [],
     loading: false,
@@ -20,7 +21,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     lastUpdated: null,
   })
 
-  // Computed properties with memoization
+  // Filtrované zoznamy podľa stavu sledovania
   const watching = computed(() => state.value.list.filter((item) => item.status === 'watching'))
   const completed = computed(() => state.value.list.filter((item) => item.status === 'completed'))
   const onHold = computed(() => state.value.list.filter((item) => item.status === 'on_hold'))
@@ -30,7 +31,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
   const dropped = computed(() => state.value.list.filter((item) => item.status === 'dropped'))
   const favorites = computed(() => state.value.list.filter((item) => item.favorite))
 
-  // Statistics
+  // Štatistiky sledovania
   const statistics = computed(() => ({
     totalAnime: state.value.list.length,
     totalEpisodes: state.value.list.reduce((sum, item) => sum + item.episodes_watched, 0),
@@ -39,7 +40,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     totalRewatches: state.value.list.reduce((sum, item) => sum + item.rewatch_count, 0),
   }))
 
-  // Helper functions
+  // Pomocné funkcie pre výpočet štatistík
   function calculateAverageRating(list: UserAnimeListItem[]): number {
     const ratedAnime = list.filter((item) => item.rating !== undefined)
     if (ratedAnime.length === 0) return 0
@@ -52,7 +53,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     return list.length ? Number(((completedAnime / list.length) * 100).toFixed(2)) : 0
   }
 
-  // Actions with error handling and optimistic updates
+  // Načítanie zoznamu anime používateľa
   async function fetchUserList() {
     try {
       state.value.loading = true
@@ -85,6 +86,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     }
   }
 
+  // Pridanie nového anime do zoznamu
   async function addToList(
     animeId: number,
     status: UserAnimeStatus = 'plan_to_watch',
@@ -119,6 +121,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     }
   }
 
+  // Aktualizácia položky v zozname
   async function updateListItem(
     animeId: number,
     updates: Partial<Omit<UserAnimeListItem, 'id' | 'user_id' | 'anime_id' | 'anime'>>,
@@ -154,6 +157,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     }
   }
 
+  // Prepnutie obľúbeného stavu anime
   async function toggleFavorite(animeId: number) {
     const item = state.value.list.find((i) => i.anime_id === animeId)
     if (item) {
@@ -161,6 +165,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     }
   }
 
+  // Zvýšenie počtu opakovaného sledovania
   async function incrementRewatch(animeId: number) {
     const item = state.value.list.find((i) => i.anime_id === animeId)
     if (item) {
@@ -168,6 +173,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     }
   }
 
+  // Odstránenie anime zo zoznamu
   async function removeFromList(animeId: number) {
     try {
       state.value.loading = true
@@ -185,14 +191,15 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     }
   }
 
+  // Export stavových premenných a funkcií
   return {
-    // State
+    // Stavové premenné
     list: computed(() => state.value.list),
     loading: computed(() => state.value.loading),
     error: computed(() => state.value.error),
     lastUpdated: computed(() => state.value.lastUpdated),
 
-    // Computed
+    // Filtrované zoznamy
     watching,
     completed,
     onHold,
@@ -201,7 +208,7 @@ export const useUserAnimeListStore = defineStore('userAnimeList', () => {
     favorites,
     statistics,
 
-    // Actions
+    // Akcie
     fetchUserList,
     addToList,
     updateListItem,

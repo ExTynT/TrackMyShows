@@ -1,9 +1,10 @@
 <template>
+  <!-- Načítavací stav -->
   <div v-if="loading" class="d-flex justify-center align-center" style="min-height: 400px">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
   </div>
   <div v-else-if="mappedAnime" class="anime-detail">
-    <!-- Hero Section -->
+    <!-- Hlavička s obrázkom a základnými informáciami -->
     <media-detail-hero
       type="anime"
       :media="mappedAnime"
@@ -18,9 +19,9 @@
 
     <v-container class="py-8">
       <v-row>
-        <!-- Main Content -->
+        <!-- Hlavný obsah -->
         <v-col cols="12" md="8">
-          <!-- Details -->
+          <!-- Detailné informácie o anime -->
           <media-detail-info
             type="anime"
             :media="mappedAnime"
@@ -33,7 +34,7 @@
             "
           />
 
-          <!-- Characters -->
+          <!-- Zoznam postáv -->
           <media-detail-characters
             :characters="
               animeStore.currentAnime?.characters?.map((char) => ({
@@ -47,9 +48,9 @@
           />
         </v-col>
 
-        <!-- Sidebar -->
+        <!-- Bočný panel -->
         <v-col cols="12" md="4">
-          <!-- User Progress -->
+          <!-- Sledovací progress používateľa -->
           <media-detail-progress
             type="anime"
             v-model="progressModel"
@@ -58,12 +59,13 @@
             @update="updateProgress"
           />
 
-          <!-- Similar Anime -->
+          <!-- Podobné anime -->
           <media-detail-similar type="anime" :items="similarAnime" />
         </v-col>
       </v-row>
     </v-container>
   </div>
+  <!-- Chybový stav - anime nenájdené -->
   <div v-else class="d-flex justify-center align-center" style="min-height: 400px">
     <div class="text-center">
       <v-icon size="64" color="grey" class="mb-4">mdi-alert</v-icon>
@@ -73,6 +75,7 @@
 </template>
 
 <script lang="ts">
+// Importy komponentov a typov
 import { defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAnimeStore } from '@/stores/animeStore'
@@ -95,6 +98,7 @@ export default defineComponent({
     MediaDetailSimilar,
   },
 
+  // Základný stav komponenty
   data() {
     const store = useAnimeStore()
     return {
@@ -110,6 +114,7 @@ export default defineComponent({
   },
 
   computed: {
+    // Mapovanie dát anime pre zobrazenie
     mappedAnime(): Media | null {
       if (!this.animeStore.currentAnime) return null
 
@@ -133,6 +138,7 @@ export default defineComponent({
       }
     },
 
+    // Výber podobných anime podľa žánrov
     similarAnime(): MediaItem[] {
       if (!this.animeStore.currentAnime) return []
 
@@ -158,12 +164,13 @@ export default defineComponent({
   },
 
   methods: {
+    // Inicializácia detailu anime a načítanie používateľského progressu
     async initialize() {
       this.loading = true
       try {
         await this.animeStore.fetchAnimeDetails(Number(this.route.params.id))
 
-        // Load user's progress if they have any
+        // Načítanie používateľského progressu ak existuje
         const userAnime = this.animeStore.userAnimeList.find(
           (item) => item.anime_id === Number(this.route.params.id),
         )
@@ -179,6 +186,7 @@ export default defineComponent({
       }
     },
 
+    // Aktualizácia používateľského progressu
     async updateProgress() {
       this.updating = true
       try {
@@ -199,6 +207,7 @@ export default defineComponent({
     this.initialize()
   },
 
+  // Sledovanie zmeny ID v URL a reinicializácia
   watch: {
     'route.params.id': {
       handler: 'initialize',

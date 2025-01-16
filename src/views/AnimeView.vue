@@ -1,6 +1,6 @@
 <template>
   <div class="anime-view">
-    <!-- Hero Section -->
+    <!-- Hlavný carousel s populárnymi anime -->
     <MediaHeroCarousel
       type="anime"
       :slides="carouselSlides"
@@ -8,14 +8,14 @@
       @navigate="navigateToAnime"
     />
 
-    <!-- Currently Airing Section -->
+    <!-- Aktuálne vysielané anime -->
     <MediaCurrentlyAiring
       type="anime"
       :media-list="animeStore.animeList"
       @navigate="navigateToAnime"
     />
 
-    <!-- Upcoming Section -->
+    <!-- Pripravované anime -->
     <MediaUpcoming
       type="anime"
       :media-list="animeStore.animeList"
@@ -23,7 +23,7 @@
       @track="trackAnime"
     />
 
-    <!-- Top Rated Section -->
+    <!-- Najlepšie hodnotené anime -->
     <section class="py-8 bg-grey-darken-4">
       <v-container>
         <h2 class="text-h4 font-weight-bold mb-6">Top Rated</h2>
@@ -40,10 +40,10 @@
       </v-container>
     </section>
 
-    <!-- Reviews Section -->
+    <!-- Sekcia s recenziami -->
     <MediaReviewsSection type="anime" />
 
-    <!-- Media Statistics Section -->
+    <!-- Štatistiky sledovania -->
     <section class="py-8">
       <v-container>
         <h2 class="text-h4 font-weight-bold mb-6">Media Statistics</h2>
@@ -60,6 +60,7 @@
 </template>
 
 <script lang="ts">
+// Importy komponentov a typov
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAnimeStore } from '../stores/animeStore'
@@ -83,6 +84,7 @@ export default defineComponent({
     MediaUpcoming,
   },
 
+  // Základný stav komponentu
   data() {
     return {
       animeStore: useAnimeStore(),
@@ -93,17 +95,24 @@ export default defineComponent({
   },
 
   computed: {
+    // Výber 10 najlepšie hodnotených anime
     topRatedAnime() {
       return [...this.animeStore.animeList]
         .sort((a, b) => (b.rating || 0) - (a.rating || 0))
         .slice(0, 10)
     },
+
+    // Celkový počet anime
     totalAnime() {
       return this.animeStore.animeList.length
     },
+
+    // Celkový počet pozretých epizód
     totalEpisodesWatched() {
       return this.animeStore.animeList.reduce((total, anime) => total + (anime.episodes || 0), 0)
     },
+
+    // Priemerné hodnotenie všetkých anime
     averageRating() {
       const animeWithRatings = this.animeStore.animeList.filter((anime) => anime.rating)
       if (!animeWithRatings.length) return 0
@@ -112,6 +121,8 @@ export default defineComponent({
         animeWithRatings.length
       )
     },
+
+    // Percento dokončených anime
     completionRate() {
       const completed = this.animeStore.animeList.filter(
         (anime) => anime.status === 'finished',
@@ -121,15 +132,17 @@ export default defineComponent({
   },
 
   methods: {
+    // Presmerovanie na detail anime
     navigateToAnime(animeId: number) {
       this.router.push(`/anime/${animeId}`)
     },
 
+    // Sledovanie anime (zatiaľ neimplementované)
     trackAnime(animeId: number) {
-      // TODO: Implement tracking functionality
       console.log('Tracking anime:', animeId)
     },
 
+    // Príprava slidov pre carousel
     async prepareCarouselSlides() {
       try {
         this.carouselLoading = true
@@ -152,6 +165,7 @@ export default defineComponent({
     },
   },
 
+  // Inicializácia pri načítaní komponenty
   async mounted() {
     await this.prepareCarouselSlides()
     if (this.animeStore.animeList.length === 0) {

@@ -1,3 +1,4 @@
+<!-- Sekcia pre recenzie médií -->
 <template>
   <v-container>
     <v-row>
@@ -6,11 +7,12 @@
       </v-col>
     </v-row>
 
-    <!-- Review Form -->
+    <!-- Formulár pre pridanie recenzie -->
     <v-row v-if="isAuthenticated">
       <v-col cols="12">
         <v-card class="pa-4">
           <v-form @submit.prevent="submitReview">
+            <!-- Výber média -->
             <v-select
               v-model="selectedMediaId"
               :items="mediaList"
@@ -21,6 +23,7 @@
               required
             ></v-select>
 
+            <!-- Hodnotenie -->
             <div class="d-flex align-center mb-4">
               <span class="text-subtitle-1 mr-4">Your Rating:</span>
               <v-rating
@@ -33,6 +36,7 @@
               <span class="text-subtitle-1 ml-2">({{ newReview.rating }}/5)</span>
             </div>
 
+            <!-- Text recenzie -->
             <v-textarea
               v-model="newReview.content"
               label="Write your review"
@@ -41,6 +45,7 @@
               required
             ></v-textarea>
 
+            <!-- Tlačidlo na odoslanie -->
             <v-btn type="submit" color="primary" :loading="submitting" :disabled="!isFormValid">
               Submit Review
             </v-btn>
@@ -49,16 +54,17 @@
       </v-col>
     </v-row>
 
-    <!-- Login Prompt -->
+    <!-- Výzva na prihlásenie -->
     <v-row v-else>
       <v-col cols="12">
         <v-alert type="info" text="Please log in to write a review" class="mb-6"></v-alert>
       </v-col>
     </v-row>
 
-    <!-- Reviews List -->
+    <!-- Zoznam recenzií -->
     <v-row>
       <v-col cols="12">
+        <!-- Načítavací indikátor -->
         <v-progress-circular
           v-if="loading"
           indeterminate
@@ -67,12 +73,15 @@
         ></v-progress-circular>
 
         <template v-else>
+          <!-- Karta recenzie -->
           <v-card v-for="review in reviews" :key="review.id" class="mb-4 pa-4">
+            <!-- Hlavička recenzie -->
             <div class="d-flex justify-space-between align-center mb-2">
               <h3 class="text-h6">{{ review.media.title }}</h3>
               <span class="text-caption">{{ formatDate(review.created_at) }}</span>
             </div>
 
+            <!-- Hodnotenie recenzie -->
             <div class="d-flex align-center mb-2">
               <v-rating
                 :model-value="review.rating"
@@ -84,9 +93,11 @@
               <span class="text-subtitle-2 ml-2">({{ review.rating }}/5)</span>
             </div>
 
+            <!-- Text recenzie -->
             <p class="text-body-1">{{ review.content }}</p>
           </v-card>
 
+          <!-- Správa ak nie sú recenzie -->
           <v-alert
             v-if="!loading && reviews.length === 0"
             type="info"
@@ -100,12 +111,14 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent, ref, onMounted, computed } from 'vue'
 import { useAnimeStore } from '@/stores/animeStore'
 import { useMangaStore } from '@/stores/mangaStore'
 import { supabase } from '@/lib/supabase'
 import type { ReviewWithMedia } from '@/types/reviews'
 
+// Rozhranie pre odpoveď z databázy
 interface ReviewResponse {
   id: number
   anime_id: number
@@ -121,15 +134,23 @@ interface ReviewResponse {
 
 export default defineComponent({
   name: 'MediaReviews',
+
+  // Vlastnosti komponentu
   props: {
+    // Typ média (anime/manga)
     type: {
       type: String as () => 'anime' | 'manga',
       required: true,
     },
   },
+
+  // Nastavenie komponentu
   setup(props) {
+    // Store pre prácu s dátami
     const animeStore = useAnimeStore()
     const mangaStore = useMangaStore()
+
+    // Reaktívne premenné
     const reviews = ref<ReviewWithMedia[]>([])
     const loading = ref(false)
     const submitting = ref(false)
@@ -141,6 +162,7 @@ export default defineComponent({
       user_id: '',
     })
 
+    // Kontrola prihlásenia používateľa
     const checkAuthStatus = async () => {
       const {
         data: { user },
@@ -148,6 +170,7 @@ export default defineComponent({
       isAuthenticated.value = !!user
     }
 
+    // Kontrola platnosti formulára
     const isFormValid = computed(() => {
       return (
         selectedMediaId.value !== null &&
@@ -156,19 +179,23 @@ export default defineComponent({
       )
     })
 
+    // Zoznam dostupných médií
     const mediaList = computed(() => {
       return props.type === 'anime' ? animeStore.animeList : mangaStore.mangaList
     })
 
+    // Získanie názvu média
     const getMediaTitle = (mediaId: number) => {
       const media = mediaList.value.find((m) => m.id === mediaId)
       return media?.title || `Unknown ${props.type}`
     }
 
+    // Formátovanie dátumu
     const formatDate = (dateString: string) => {
       return new Date(dateString).toLocaleDateString()
     }
 
+    // Načítanie recenzií
     const fetchReviews = async () => {
       loading.value = true
       try {
@@ -196,7 +223,6 @@ export default defineComponent({
 
         if (error) throw error
 
-        // Transform the data to match ReviewWithMedia type
         reviews.value = (data as unknown as ReviewResponse[])?.map((review) => ({
           ...review,
           media: review[props.type]!,
@@ -208,6 +234,7 @@ export default defineComponent({
       }
     }
 
+    // Odoslanie novej recenzie
     const submitReview = async () => {
       if (!isFormValid.value || !isAuthenticated.value) {
         console.log('Form validation failed:', {
@@ -229,15 +256,7 @@ export default defineComponent({
           return
         }
 
-        console.log('Preparing review data:', {
-          [props.type === 'anime' ? 'anime_id' : 'manga_id']: selectedMediaId.value,
-          user_id: user.id,
-          rating: newReview.value.rating,
-          content: newReview.value.content,
-          type: props.type,
-        })
-
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('anime_reviews')
           .insert({
             [props.type === 'anime' ? 'anime_id' : 'manga_id']: selectedMediaId.value,
@@ -248,45 +267,36 @@ export default defineComponent({
           })
           .select()
 
-        if (error) {
-          console.error('Error inserting review:', error)
-          throw error
-        }
+        if (error) throw error
 
-        console.log('Review inserted successfully:', data)
-        await fetchReviews()
-
-        // Reset form
-        selectedMediaId.value = null
+        // Reset formulára a obnovenie zoznamu
         newReview.value = {
           rating: 0,
           content: '',
           user_id: '',
         }
+        selectedMediaId.value = null
+        await fetchReviews()
       } catch (error) {
-        console.error('Error in submitReview:', error)
+        console.error('Error submitting review:', error)
       } finally {
         submitting.value = false
       }
     }
 
+    // Inicializácia komponenty
     onMounted(async () => {
       await checkAuthStatus()
-      fetchReviews()
-      if (props.type === 'anime') {
-        animeStore.fetchAnimeList()
-      } else {
-        mangaStore.fetchMangaList()
-      }
+      await fetchReviews()
     })
 
     return {
       reviews,
       loading,
       submitting,
-      newReview,
-      selectedMediaId,
       isAuthenticated,
+      selectedMediaId,
+      newReview,
       isFormValid,
       mediaList,
       getMediaTitle,

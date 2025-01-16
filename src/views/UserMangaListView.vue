@@ -1,7 +1,7 @@
 <template>
   <div class="user-manga-list">
     <v-container class="py-12">
-      <!-- Header Section -->
+      <!-- Hlavička so základnými informáciami -->
       <div class="header-section mb-12">
         <div class="d-flex align-center justify-space-between mb-3">
           <h1 class="text-h3 font-weight-bold">My Manga List</h1>
@@ -19,12 +19,12 @@
         <div class="text-subtitle-1 text-grey">Track and manage your manga reading progress</div>
       </div>
 
-      <!-- Status Tabs -->
+      <!-- Záložky pre filtrovanie podľa stavu -->
       <v-card class="mb-8" variant="flat">
         <MediaStatusTabs v-model="selectedStatus" :tabs="tabs" />
       </v-card>
 
-      <!-- Statistics -->
+      <!-- Štatistiky čítania -->
       <v-card class="mb-8" variant="flat">
         <MediaStatistics
           type="manga"
@@ -35,14 +35,14 @@
         />
       </v-card>
 
-      <!-- Loading State -->
+      <!-- Načítavací stav -->
       <v-row v-if="store.loading">
         <v-col cols="12" class="d-flex justify-center align-center" style="min-height: 400px">
           <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
         </v-col>
       </v-row>
 
-      <!-- Content -->
+      <!-- Zoznam mangy -->
       <template v-else>
         <v-row v-if="displayedMangaList.length > 0">
           <v-col v-for="item in displayedMangaList" :key="item.id" cols="12">
@@ -54,7 +54,7 @@
                 class="transition-swing"
               >
                 <div class="d-flex">
-                  <!-- Image Section -->
+                  <!-- Obrázok mangy -->
                   <div
                     class="media-image-container"
                     style="cursor: pointer"
@@ -69,9 +69,9 @@
                     ></v-img>
                   </div>
 
-                  <!-- Content Section -->
+                  <!-- Detaily mangy -->
                   <div class="flex-grow-1 pa-4">
-                    <!-- Title and Info -->
+                    <!-- Názov a poznámky -->
                     <div class="d-flex flex-column">
                       <h3 class="text-h5 font-weight-bold mb-2">{{ item.manga.title }}</h3>
                       <v-textarea
@@ -86,7 +86,7 @@
                         @change="updateNotes(item)"
                       ></v-textarea>
 
-                      <!-- Genres -->
+                      <!-- Žánre -->
                       <div class="mb-4">
                         <v-chip
                           v-for="genre in item.manga.genres"
@@ -99,7 +99,7 @@
                         </v-chip>
                       </div>
 
-                      <!-- Rating -->
+                      <!-- Hodnotenie -->
                       <div class="d-flex align-center mb-4">
                         <v-rating
                           v-model="item.rating"
@@ -114,7 +114,7 @@
                         >
                       </div>
 
-                      <!-- Progress -->
+                      <!-- Ovládanie kapitol -->
                       <div class="d-flex align-center">
                         <v-btn
                           icon="mdi-minus"
@@ -139,7 +139,7 @@
                           @click="updateChapters(item, 1)"
                         ></v-btn>
 
-                        <!-- Status and Favorite Menu -->
+                        <!-- Menu pre stav a obľúbené -->
                         <v-menu>
                           <template v-slot:activator="{ props }">
                             <v-btn
@@ -198,7 +198,7 @@
                           </v-list>
                         </v-menu>
 
-                        <!-- Remove Button -->
+                        <!-- Tlačidlo pre odstránenie -->
                         <v-spacer></v-spacer>
                         <v-btn
                           color="error"
@@ -217,7 +217,7 @@
           </v-col>
         </v-row>
 
-        <!-- Empty State -->
+        <!-- Prázdny stav -->
         <v-row v-else>
           <v-col cols="12">
             <v-card class="pa-12 text-center" variant="flat">
@@ -238,6 +238,7 @@
 </template>
 
 <script lang="ts">
+// Importy komponentov a závislostí
 import { defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserMangaListStore } from '../stores/userMangaListStore'
@@ -249,11 +250,13 @@ import type { UserMangaListItem, UserMangaStatus } from '../types/manga'
 export default defineComponent({
   name: 'UserMangaListView',
 
+  // Registrácia komponentov
   components: {
     MediaStatusTabs,
     MediaStatistics,
   },
 
+  // Základný stav komponentu
   data() {
     return {
       store: useUserMangaListStore(),
@@ -272,89 +275,92 @@ export default defineComponent({
   },
 
   computed: {
+    // Filtrovanie zoznamu podľa vybraného stavu
     displayedMangaList() {
       if (this.selectedStatus === 'favorites') {
-        return this.store.list.filter((item: UserMangaListItem) => item.favorite)
+        return this.store.list.filter((item) => item.favorite)
       }
-      return this.store.list.filter(
-        (item: UserMangaListItem) => item.status === this.selectedStatus,
-      )
+      return this.store.list.filter((item) => item.status === this.selectedStatus)
     },
 
+    // Celkový počet mangy
     totalManga() {
       return this.store.list.length
     },
 
+    // Celkový počet prečítaných kapitol
     totalChaptersRead() {
-      return this.store.list.reduce(
-        (sum: number, item: UserMangaListItem) => sum + item.chapters_read,
-        0,
-      )
+      return this.store.list.reduce((sum, item) => sum + item.chapters_read, 0)
     },
 
+    // Priemerné hodnotenie
     averageRating() {
-      const ratedManga = this.store.list.filter((item: UserMangaListItem) => item.rating)
+      const ratedManga = this.store.list.filter((item) => item.rating)
       if (!ratedManga.length) return 0
-      return (
-        ratedManga.reduce((sum: number, item: UserMangaListItem) => sum + (item.rating || 0), 0) /
-        ratedManga.length
-      )
+      return ratedManga.reduce((sum, item) => sum + (item.rating || 0), 0) / ratedManga.length
     },
 
+    // Percento dokončenej mangy
     completionRate() {
-      const completed = this.store.list.filter(
-        (item: UserMangaListItem) => item.status === 'completed',
-      ).length
+      const completed = this.store.list.filter((item) => item.status === 'completed').length
       return this.totalManga ? (completed / this.totalManga) * 100 : 0
     },
   },
 
   methods: {
+    // Aktualizácia počtu prečítaných kapitol
     async updateChapters(item: UserMangaListItem, change: number) {
       const newCount = item.chapters_read + change
       await this.actions.updateChapters(item.manga_id, newCount)
 
-      // Auto-complete when reaching last chapter
+      // Automatické dokončenie pri dosiahnutí poslednej kapitoly
       if (newCount === item.manga.chapters && item.status !== 'completed') {
         await this.actions.updateStatus(item.manga_id, 'completed')
       }
-      // Change back to reading when decreasing from max chapters
+      // Zmena späť na čítanie pri znížení počtu kapitol
       else if (newCount < item.manga.chapters && item.status === 'completed') {
         await this.actions.updateStatus(item.manga_id, 'reading')
       }
     },
 
+    // Aktualizácia poznámok
     async updateNotes(item: UserMangaListItem) {
       await this.actions.updateNotes(item.manga_id, item.notes || '')
     },
 
+    // Aktualizácia hodnotenia
     async updateRating(item: UserMangaListItem, rating: number) {
       await this.actions.updateRating(item.manga_id, rating)
     },
 
+    // Odstránenie mangy zo zoznamu
     async removeFromList(item: UserMangaListItem) {
       if (confirm('Are you sure you want to remove this manga from your list?')) {
         await this.actions.removeFromList(item.manga_id)
       }
     },
 
+    // Aktualizácia stavu čítania
     async updateStatus(item: UserMangaListItem, status: UserMangaStatus) {
       await this.actions.updateStatus(item.manga_id, status)
     },
 
+    // Prepnutie obľúbeného stavu
     async toggleFavorite(item: UserMangaListItem) {
       await this.actions.toggleFavorite(item.manga_id)
     },
   },
 
+  // Načítanie zoznamu pri vytvorení komponentu
   async created() {
     try {
       await this.store.fetchUserList()
     } catch (error) {
-      console.error('Error fetching user manga list:', error)
+      console.error('Error fetching user list:', error)
     }
   },
 
+  // Kontrola a načítanie zoznamu pri pripojení komponentu
   async mounted() {
     if (this.store.list.length === 0) {
       await this.store.fetchUserList()

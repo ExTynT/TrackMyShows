@@ -1,16 +1,19 @@
 <template>
+  <!-- Hlavný kontajner pre registráciu -->
   <div class="auth-view">
     <SignUpForm />
   </div>
 </template>
 
 <script lang="ts">
+// Importy komponentov
 import { defineComponent } from 'vue'
 import SignUpForm from '@/components/SignUpForm.vue'
 
 export default defineComponent({
   name: 'SignUpView',
 
+  // Registrácia komponentu pre registračný formulár
   components: {
     SignUpForm,
   },

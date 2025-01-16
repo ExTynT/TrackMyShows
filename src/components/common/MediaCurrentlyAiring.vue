@@ -1,12 +1,17 @@
+<!-- Sekcia pre aktuálne vysielané/publikované médiá -->
 <template>
   <section class="py-8">
     <v-container>
+      <!-- Nadpis sekcie -->
       <h2 class="text-h4 font-weight-bold mb-6">
         Currently {{ type === 'anime' ? 'Airing' : 'Publishing' }}
       </h2>
+      <!-- Mriežka s médiami -->
       <v-row>
         <v-col v-for="media in currentlyAiringMedia" :key="media.id" cols="12" sm="6" md="4">
+          <!-- Karta média -->
           <v-card class="h-100" @click="$emit('navigate', media.id)">
+            <!-- Obrázok s titulkom -->
             <v-img
               :src="media.image_url"
               :alt="media.title"
@@ -18,7 +23,9 @@
               <v-card-title class="text-white">{{ media.title }}</v-card-title>
             </v-img>
 
+            <!-- Detaily média -->
             <v-card-text>
+              <!-- Hodnotenie -->
               <div class="d-flex align-center mb-2">
                 <v-rating
                   v-if="media.rating"
@@ -35,10 +42,12 @@
                 <span v-else class="text-grey-darken-1 text-caption">No rating yet</span>
               </div>
 
+              <!-- Počet epizód/kapitol -->
               <p class="text-caption text-grey-darken-1">
                 {{ type === 'anime' ? 'Episodes' : 'Chapters' }}:
                 {{ getMediaCount(media) || 'Unknown' }}
               </p>
+              <!-- Stav vysielania/publikovania -->
               <p class="text-caption text-grey-darken-1 mb-0">Status: {{ media.status }}</p>
             </v-card-text>
           </v-card>
@@ -57,20 +66,26 @@ import type { Manga } from '../../types/manga'
 export default defineComponent({
   name: 'MediaCurrentlyAiring',
 
+  // Vlastnosti komponentu
   props: {
+    // Typ média (anime/manga)
     type: {
       type: String as () => 'anime' | 'manga',
       required: true,
     },
+    // Zoznam médií
     mediaList: {
       type: Array as PropType<Anime[] | Manga[]>,
       required: true,
     },
   },
 
+  // Definícia emitovaných udalostí
   emits: ['navigate'],
 
+  // Nastavenie komponentu
   setup(props) {
+    // Filtrovanie aktuálne vysielaných/publikovaných médií
     const currentlyAiringMedia = computed(() => {
       console.log(
         'MediaList:',
@@ -86,6 +101,7 @@ export default defineComponent({
         .slice(0, 3)
     })
 
+    // Získanie počtu epizód/kapitol
     const getMediaCount = (media: Anime | Manga) => {
       if (props.type === 'anime') {
         return (media as Anime).episodes

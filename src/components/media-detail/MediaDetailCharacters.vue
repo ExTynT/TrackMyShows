@@ -1,11 +1,15 @@
+<!-- Sekcia pre zobrazenie postáv -->
 <template>
   <v-card class="mb-6" elevation="2">
+    <!-- Nadpis sekcie -->
     <v-card-title class="text-h5 py-4 px-6 bg-primary text-white">
       <v-icon start class="me-2">mdi-account-multiple</v-icon>
       Characters
     </v-card-title>
+    <!-- Zoznam postáv -->
     <v-card-text class="pa-6">
       <v-row>
+        <!-- Karta pre každú postavu -->
         <v-col
           v-for="character in characters"
           :key="character.id"
@@ -14,6 +18,7 @@
           md="4"
           class="d-flex"
         >
+          <!-- Efekt pri prejdení myšou -->
           <v-hover v-slot="{ isHovering, props }">
             <v-card
               :elevation="isHovering ? 8 : 2"
@@ -23,18 +28,23 @@
               class="character-card d-flex flex-column"
               width="100%"
             >
+              <!-- Ikona postavy -->
               <div class="character-icon-container pa-8 d-flex justify-center align-center">
                 <v-avatar size="48">
                   <v-icon :icon="character.icon" color="primary"></v-icon>
                 </v-avatar>
               </div>
+              <!-- Informácie o postave -->
               <v-card-text class="flex-grow-1 d-flex flex-column">
                 <div>
+                  <!-- Meno postavy -->
                   <h3 class="text-h6 mb-2">{{ character.name }}</h3>
+                  <!-- Japonské meno -->
                   <p v-if="character.japanese_name" class="text-grey mb-2">
                     {{ character.japanese_name }}
                   </p>
                 </div>
+                <!-- Popis postavy -->
                 <p class="text-body-2 mt-auto">{{ character.description }}</p>
               </v-card-text>
             </v-card>
@@ -46,8 +56,10 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent, PropType } from 'vue'
 
+// Rozhranie pre postavu
 interface Character {
   id: number
   name: string
@@ -59,7 +71,9 @@ interface Character {
 export default defineComponent({
   name: 'MediaDetailCharacters',
 
+  // Vlastnosti komponenty
   props: {
+    // Zoznam postáv na zobrazenie
     characters: {
       type: Array as PropType<Character[]>,
       required: true,

@@ -1,11 +1,15 @@
+<!-- Karta s detailnými informáciami -->
 <template>
   <v-card class="mb-6" elevation="2">
+    <!-- Nadpis karty -->
     <v-card-title class="text-h5 py-4 px-6 bg-primary text-white">
       <v-icon start class="me-2">mdi-information</v-icon>
       Details
     </v-card-title>
+    <!-- Obsah karty -->
     <v-card-text class="pa-6">
       <v-row>
+        <!-- Stav média -->
         <v-col cols="4" class="text-grey text-subtitle-1">Status</v-col>
         <v-col cols="8" class="text-subtitle-1">
           <v-chip :color="statusColor" label>
@@ -13,11 +17,13 @@
           </v-chip>
         </v-col>
 
+        <!-- Počet epizód/kapitol -->
         <v-col cols="4" class="text-grey text-subtitle-1">{{ countLabel }}</v-col>
         <v-col cols="8" class="text-subtitle-1">
           {{ contentCount }}
         </v-col>
 
+        <!-- Počet zväzkov (len pre mangu) -->
         <template v-if="type === 'manga' && media.volumes">
           <v-col cols="4" class="text-grey text-subtitle-1">Volumes</v-col>
           <v-col cols="8" class="text-subtitle-1">
@@ -25,6 +31,7 @@
           </v-col>
         </template>
 
+        <!-- Sezóna a rok (len pre anime) -->
         <template v-if="type === 'anime' && media.season">
           <v-col cols="4" class="text-grey text-subtitle-1">Season</v-col>
           <v-col cols="8" class="text-subtitle-1 text-capitalize">
@@ -32,6 +39,7 @@
           </v-col>
         </template>
 
+        <!-- Štúdiá/Autori -->
         <v-col cols="4" class="text-grey text-subtitle-1">{{ creditLabel }}</v-col>
         <v-col cols="8">
           <v-chip
@@ -49,6 +57,7 @@
           </v-chip>
         </v-col>
 
+        <!-- Žánre -->
         <v-col cols="4" class="text-grey text-subtitle-1">Genres</v-col>
         <v-col cols="8">
           <v-chip v-for="genre in genres" :key="genre.id" class="mr-2 mb-2" variant="outlined">
@@ -61,6 +70,7 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 import type { Media, Credit } from '@/types/media'
@@ -68,36 +78,46 @@ import type { Media, Credit } from '@/types/media'
 export default defineComponent({
   name: 'MediaDetailInfo',
 
+  // Vlastnosti komponenty
   props: {
+    // Typ média (anime/manga)
     type: {
       type: String as PropType<'anime' | 'manga'>,
       required: true,
     },
+    // Údaje o médiu
     media: {
       type: Object as PropType<Media>,
       required: true,
     },
+    // Zoznam tvorcov
     credits: {
       type: Array as PropType<Credit[]>,
       required: true,
     },
   },
 
+  // Vypočítané vlastnosti
   computed: {
+    // Text pre štúdiá/autorov
     creditLabel(): string {
       return this.type === 'anime' ? 'Studios' : 'Authors'
     },
+    // Text pre počet epizód/kapitol
     countLabel(): string {
       return this.type === 'anime' ? 'Episodes' : 'Chapters'
     },
+    // Počet epizód/kapitol
     contentCount(): string {
       return this.type === 'anime'
         ? String(this.media.episodes || 'Unknown')
         : String(this.media.chapters || 'Unknown')
     },
+    // Zoznam žánrov
     genres(): Array<{ id: number; name: string }> {
       return this.media.genres
     },
+    // Farba pre stav média
     statusColor(): string {
       const status = this.media.status.toLowerCase()
       if (this.type === 'anime') {

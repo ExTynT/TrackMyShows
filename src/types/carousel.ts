@@ -5,6 +5,9 @@ export interface HomeCarouselSlide {
   button_text: string
   image_url: string
   order_index: number
+  type: 'anime' | 'manga' | 'other'
+  content_id?: number
+  link?: string
 }
 
 export interface MediaCarouselSlide {

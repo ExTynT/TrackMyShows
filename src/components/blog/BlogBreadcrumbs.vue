@@ -1,3 +1,4 @@
+<!-- Navigačná lišta pre blog -->
 <template>
   <v-breadcrumbs
     :items="[
@@ -13,9 +14,11 @@
       },
     ]"
   >
+    <!-- Oddeľovač medzi položkami -->
     <template v-slot:divider>
       <v-icon icon="mdi-chevron-right" size="small"></v-icon>
     </template>
+    <!-- Tlačidlo pre každú položku -->
     <template v-slot:title="{ item }">
       <v-btn
         :to="item.to"
@@ -32,12 +35,15 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 
 export default defineComponent({
   name: 'BlogBreadcrumbs',
 
+  // Vlastnosti komponenty
   props: {
+    // Voliteľný názov blogu pre navigáciu
     blogTitle: {
       type: String,
       required: false,

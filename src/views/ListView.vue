@@ -1,6 +1,7 @@
 <template>
   <div class="list-view">
     <v-container class="py-12">
+      <!-- Prepínač medzi anime a mangou -->
       <div class="header-section mb-12">
         <media-type-selector
           v-model:mediaType="mediaType"
@@ -8,14 +9,17 @@
         />
       </div>
 
+      <!-- Vyhľadávanie a filtrovanie -->
       <media-search-filter :available-genres="availableGenres" @search="handleSearch" />
 
+      <!-- Zobrazenie výsledkov -->
       <media-grid :items="filteredResults" :loading="loading" @item-click="navigateToDetail" />
     </v-container>
   </div>
 </template>
 
 <script lang="ts">
+// Importy komponentov a store manažérov
 import { mapState, mapActions } from 'pinia'
 import { useAnimeStore } from '@/stores/animeStore'
 import { useMangaStore } from '@/stores/mangaStore'
@@ -27,6 +31,7 @@ import MediaTypeSelector from '@/components/list/MediaTypeSelector.vue'
 import MediaSearchFilter from '@/components/list/MediaSearchFilter.vue'
 import MediaGrid from '@/components/list/MediaGrid.vue'
 
+// Definícia typu pre stav komponentu
 interface MediaListState {
   mediaType: 'anime' | 'manga'
   searchQuery: string
@@ -43,6 +48,7 @@ export default {
     MediaGrid,
   },
 
+  // Základný stav komponentu
   data(): MediaListState {
     return {
       mediaType: 'anime',
@@ -56,6 +62,7 @@ export default {
     ...mapState(useAnimeStore, ['animeList']),
     ...mapState(useMangaStore, ['mangaList']),
 
+    // Získanie dostupných žánrov z aktuálneho zoznamu
     availableGenres(): string[] {
       const items = this.mediaType === 'anime' ? this.animeList : this.mangaList
       const genreSet = new Set<string>()
@@ -72,6 +79,7 @@ export default {
       return Array.from(genreSet).sort()
     },
 
+    // Filtrovanie výsledkov podľa vyhľadávania a žánrov
     filteredResults(): (Anime | Manga)[] {
       const items = this.mediaType === 'anime' ? this.animeList : this.mangaList
 
@@ -85,6 +93,7 @@ export default {
     ...mapActions(useAnimeStore, ['fetchAnimeList']),
     ...mapActions(useMangaStore, ['fetchMangaList']),
 
+    // Filtrovanie podľa názvu
     filterByTitle(item: Anime | Manga): boolean {
       if (!this.searchQuery) return true
 
@@ -95,6 +104,7 @@ export default {
       )
     },
 
+    // Filtrovanie podľa žánrov
     filterByGenres(item: Anime | Manga): boolean {
       if (this.selectedGenres.length === 0) return true
 
@@ -107,11 +117,13 @@ export default {
       )
     },
 
+    // Obsluha zmeny typu média (anime/manga)
     handleMediaTypeChange(type: 'anime' | 'manga'): void {
       this.mediaType = type
       this.loadData()
     },
 
+    // Obsluha vyhľadávania
     handleSearch({ query, genres }: { query: string; genres: string[] }): void {
       this.searchQuery = query
       this.selectedGenres = genres
@@ -121,10 +133,12 @@ export default {
       }, 500)
     },
 
+    // Presmerovanie na detail položky
     navigateToDetail(id: number): void {
       router.push(`/${this.mediaType}/${id}`)
     },
 
+    // Načítanie dát podľa zvoleného typu média
     async loadData(): Promise<void> {
       this.loading = true
       try {
@@ -145,6 +159,7 @@ export default {
     },
   },
 
+  // Načítanie dát pri vytvorení komponentu
   created() {
     this.loadData()
   },

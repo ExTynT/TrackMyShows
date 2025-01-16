@@ -1,6 +1,6 @@
 <template>
   <div class="manga-view">
-    <!-- Hero Section -->
+    <!-- Hlavný carousel s populárnou mangou -->
     <MediaHeroCarousel
       type="manga"
       :slides="carouselSlides"
@@ -8,17 +8,17 @@
       @navigate="navigateToManga"
     />
 
-    <!-- Currently Publishing Section -->
+    <!-- Aktuálne vydávané mangy -->
     <MediaCurrentlyAiring
       type="manga"
       :media-list="mangaStore.mangaList"
       @navigate="navigateToManga"
     />
 
-    <!-- Upcoming Section -->
+    <!-- Pripravované mangy -->
     <MediaUpcoming type="manga" :media-list="mangaStore.mangaList" @navigate="navigateToManga" />
 
-    <!-- Top Rated Section -->
+    <!-- Najlepšie hodnotené mangy -->
     <section class="py-8 bg-grey-darken-4">
       <v-container>
         <h2 class="text-h4 font-weight-bold mb-6">Top Rated</h2>
@@ -35,10 +35,10 @@
       </v-container>
     </section>
 
-    <!-- Reviews Section -->
+    <!-- Sekcia s recenziami -->
     <MediaReviewsSection type="manga" />
 
-    <!-- Media Statistics Section -->
+    <!-- Štatistiky mangy -->
     <section class="py-8">
       <v-container>
         <h2 class="text-h4 font-weight-bold mb-6">Media Statistics</h2>
@@ -88,17 +88,24 @@ export default defineComponent({
   },
 
   computed: {
+    // Výber 10 najlepšie hodnotených máng
     topRatedManga() {
       return [...this.mangaStore.mangaList]
         .sort((a, b) => (b.rating || 0) - (a.rating || 0))
         .slice(0, 10)
     },
+
+    // Celkový počet máng
     totalManga() {
       return this.mangaStore.mangaList.length
     },
+
+    // Celkový počet prečítaných kapitol
     totalChaptersRead() {
       return this.mangaStore.mangaList.reduce((total, manga) => total + (manga.chapters || 0), 0)
     },
+
+    // Priemerné hodnotenie všetkých máng
     averageMangaRating() {
       const mangaWithRatings = this.mangaStore.mangaList.filter((manga) => manga.rating)
       if (!mangaWithRatings.length) return 0
@@ -107,6 +114,8 @@ export default defineComponent({
         mangaWithRatings.length
       )
     },
+
+    // Percento dokončených máng
     mangaCompletionRate() {
       const completed = this.mangaStore.mangaList.filter(
         (manga) => manga.status === 'completed',
@@ -116,19 +125,21 @@ export default defineComponent({
   },
 
   methods: {
+    // Presmerovanie na detail mangy
     navigateToManga(id: number) {
       this.router.push(`/manga/${id}`)
     },
 
+    // Príprava slidov pre carousel
     async prepareCarouselSlides() {
       this.carouselLoading = true
       try {
-        // Load manga if not already loaded
+        // Načítanie mangy ak ešte nie je načítaná
         if (this.mangaStore.mangaList.length === 0) {
           await this.mangaStore.fetchMangaList()
         }
 
-        // Get top 3 manga by rating
+        // Získanie top 3 máng podľa hodnotenia
         const topManga = [...this.mangaStore.mangaList]
           .sort((a, b) => (b.rating || 0) - (a.rating || 0))
           .slice(0, 3)
@@ -148,6 +159,7 @@ export default defineComponent({
     },
   },
 
+  // Inicializácia pri načítaní komponenty
   async mounted() {
     await this.prepareCarouselSlides()
   },

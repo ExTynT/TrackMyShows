@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabase'
 
+// Rozhranie pre novinku
 export interface NewsItem {
   id: number
   title: string
@@ -14,7 +15,9 @@ export interface NewsItem {
   author: string
 }
 
+// Store pre správu noviniek
 export const useNewsStore = defineStore('news', {
+  // Stavové premenné
   state: () => ({
     news: [] as NewsItem[],
     currentNews: null as NewsItem | null,
@@ -22,7 +25,9 @@ export const useNewsStore = defineStore('news', {
     error: null as string | null,
   }),
 
+  // Akcie pre prácu s novinkami
   actions: {
+    // Načítanie všetkých noviniek
     async fetchNews() {
       this.loading = true
       this.error = null
@@ -42,6 +47,7 @@ export const useNewsStore = defineStore('news', {
       }
     },
 
+    // Načítanie detailu konkrétnej novinky
     async fetchNewsDetail(slug: string) {
       this.loading = true
       this.error = null
@@ -63,6 +69,7 @@ export const useNewsStore = defineStore('news', {
       }
     },
 
+    // Pridanie novej novinky
     async addNews(newsItem: Omit<NewsItem, 'id'>) {
       const { data, error } = await supabase.from('news').insert([newsItem]).select()
 
@@ -70,6 +77,7 @@ export const useNewsStore = defineStore('news', {
       return data[0]
     },
 
+    // Aktualizácia existujúcej novinky
     async updateNews(id: number, updates: Partial<NewsItem>) {
       const { data, error } = await supabase.from('news').update(updates).eq('id', id).select()
 
@@ -77,6 +85,7 @@ export const useNewsStore = defineStore('news', {
       return data[0]
     },
 
+    // Odstránenie novinky
     async removeNews(id: number) {
       const { error } = await supabase.from('news').delete().eq('id', id)
 

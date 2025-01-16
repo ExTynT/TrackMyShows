@@ -1,11 +1,15 @@
+<!-- Sekcia pre pripravované médiá -->
 <template>
   <section class="py-8">
     <v-container>
+      <!-- Nadpis sekcie -->
       <h2 class="text-h4 font-weight-bold mb-6">
         Upcoming {{ type === 'anime' ? 'Anime' : 'Manga' }}
       </h2>
+      <!-- Mriežka s médiami -->
       <v-row>
         <v-col v-for="media in upcomingMedia" :key="media.id" cols="12" sm="6" md="4">
+          <!-- Efekt pri prejdení myšou -->
           <v-hover v-slot="{ isHovering, props }">
             <v-card
               class="h-100 upcoming-card"
@@ -14,6 +18,7 @@
               v-bind="props"
               @click="$emit('navigate', media.id)"
             >
+              <!-- Obrázok s titulkom -->
               <v-img
                 :src="
                   media.image_url ||
@@ -27,11 +32,14 @@
                 <v-card-title class="text-white text-truncate">{{ media.title }}</v-card-title>
               </v-img>
 
+              <!-- Detaily média -->
               <v-card-text>
+                <!-- Krátky popis -->
                 <p class="text-body-2 text-grey-darken-1 mb-3 synopsis">
                   {{ media.synopsis }}
                 </p>
 
+                <!-- Informácie o vydaní -->
                 <div class="d-flex align-center justify-space-between">
                   <div>
                     <v-chip color="primary" size="small" class="mr-2">
@@ -52,6 +60,7 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent, computed } from 'vue'
 import type { PropType } from 'vue'
 import type { Anime } from '../../types/anime'
@@ -60,24 +69,31 @@ import type { Manga } from '../../types/manga'
 export default defineComponent({
   name: 'MediaUpcoming',
 
+  // Vlastnosti komponentu
   props: {
+    // Typ média (anime/manga)
     type: {
       type: String as () => 'anime' | 'manga',
       required: true,
     },
+    // Zoznam médií
     mediaList: {
       type: Array as PropType<Anime[] | Manga[]>,
       required: true,
     },
   },
 
+  // Definícia emitovaných udalostí
   emits: ['navigate'],
 
+  // Nastavenie komponentu
   setup(props) {
+    // Kontrola typu média
     const isAnime = (media: Anime | Manga): media is Anime => {
       return props.type === 'anime'
     }
 
+    // Filtrovanie pripravovaných médií
     const upcomingMedia = computed(() => {
       return props.mediaList
         .filter((media) => {
@@ -95,6 +111,7 @@ export default defineComponent({
         .slice(0, 3)
     })
 
+    // Formátovanie dátumu vydania
     const getReleaseDate = (media: Anime | Manga) => {
       if (isAnime(media)) {
         return media.year ? `Coming in ${media.year}` : 'Release year unknown'

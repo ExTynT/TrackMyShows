@@ -1,12 +1,12 @@
 <template>
   <div class="home-view">
     <v-container>
-      <!-- Loading State -->
+      <!-- Načítavací stav -->
       <div v-if="loading" class="d-flex justify-center align-center py-12">
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
       </div>
 
-      <!-- Error State -->
+      <!-- Chybový stav s možnosťou opakovania -->
       <div v-else-if="error" class="d-flex flex-column align-center py-12">
         <v-icon size="64" color="error" class="mb-4">mdi-alert-circle</v-icon>
         <h2 class="text-h5 text-error mb-2">Error Loading Content</h2>
@@ -14,10 +14,13 @@
         <v-btn color="primary" @click="initialize">Retry</v-btn>
       </div>
 
-      <!-- Content -->
+      <!-- Hlavný obsah domovskej stránky -->
       <template v-else>
+        <!-- Carousel s populárnym obsahom -->
         <hero-carousel />
+        <!-- Najnovšie novinky -->
         <latest-news />
+        <!-- Blogy a recenzie -->
         <blogs-and-reviews />
       </template>
     </v-container>
@@ -25,6 +28,7 @@
 </template>
 
 <script lang="ts">
+// Importy komponentov a store manažérov
 import { defineComponent } from 'vue'
 import HeroCarousel from '@/components/HeroCarousel.vue'
 import LatestNews from '@/components/LatestNews.vue'
@@ -41,6 +45,7 @@ export default defineComponent({
     BlogsAndReviews,
   },
 
+  // Základný stav komponentu
   data() {
     return {
       newsStore: useNewsStore(),
@@ -51,11 +56,13 @@ export default defineComponent({
   },
 
   methods: {
+    // Inicializácia a načítanie dát pre domovskú stránku
     async initialize() {
       this.loading = true
       this.error = null
 
       try {
+        // Paralelné načítanie noviniek a blogov
         await Promise.all([this.newsStore.fetchNews(), this.blogStore.fetchPosts()])
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to load content'
@@ -65,6 +72,7 @@ export default defineComponent({
     },
   },
 
+  // Spustenie inicializácie pri načítaní stránky
   mounted() {
     this.initialize()
   },

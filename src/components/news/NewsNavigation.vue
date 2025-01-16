@@ -1,5 +1,7 @@
+<!-- Navigácia medzi novinkami -->
 <template>
   <div class="d-flex justify-space-between align-center mt-8">
+    <!-- Tlačidlo pre predchádzajúcu novinku -->
     <v-btn
       v-if="previousNewsId"
       color="primary"
@@ -12,6 +14,7 @@
     </v-btn>
     <v-spacer v-else></v-spacer>
 
+    <!-- Tlačidlo pre nasledujúcu novinku -->
     <v-btn
       v-if="nextNewsId"
       color="primary"
@@ -28,9 +31,11 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import { useNewsStore } from '../../stores/news'
 
+// Rozhranie pre stav komponentu
 interface NewsNavigationState {
   newsStore: ReturnType<typeof useNewsStore>
 }
@@ -38,12 +43,15 @@ interface NewsNavigationState {
 export default defineComponent({
   name: 'NewsNavigation',
 
+  // Vlastnosti komponentu
   props: {
+    // ID predchádzajúcej novinky
     previousNewsId: {
       type: Number as () => number | null | undefined,
       required: false,
       default: undefined,
     },
+    // ID nasledujúcej novinky
     nextNewsId: {
       type: Number as () => number | null | undefined,
       required: false,
@@ -51,6 +59,7 @@ export default defineComponent({
     },
   },
 
+  // Inicializácia stavu
   data(): NewsNavigationState {
     const store = useNewsStore()
     return {
@@ -58,18 +67,23 @@ export default defineComponent({
     }
   },
 
+  // Vypočítané vlastnosti
   computed: {
+    // Stav načítavania
     loading(): boolean {
       return this.newsStore.loading
     },
+    // Cesta k predchádzajúcej novinke
     previousNewsRoute(): string {
       return `/news/${this.previousNewsId}`
     },
+    // Cesta k nasledujúcej novinke
     nextNewsRoute(): string {
       return `/news/${this.nextNewsId}`
     },
   },
 
+  // Načítanie detailov noviniek po vytvorení komponentu
   async mounted() {
     if (this.previousNewsId) {
       await this.newsStore.fetchNewsDetail(this.previousNewsId.toString())

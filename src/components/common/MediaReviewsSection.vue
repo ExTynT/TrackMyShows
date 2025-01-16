@@ -1,9 +1,12 @@
+<!-- Sekcia pre zobrazenie recenzií médií -->
 <template>
   <section class="py-8 bg-grey-darken-4">
     <v-container>
+      <!-- Nadpis sekcie -->
       <h2 class="text-h4 font-weight-bold mb-6">
         {{ title || `${type === 'anime' ? 'Anime' : 'Manga'} Reviews` }}
       </h2>
+      <!-- Komponent pre recenzie -->
       <v-row>
         <v-col cols="12">
           <MediaReviews :type="type" />
@@ -14,21 +17,26 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import MediaReviews from '@/components/common/MediaReviews.vue'
 
 export default defineComponent({
   name: 'MediaReviewsSection',
 
+  // Registrácia komponentov
   components: {
     MediaReviews,
   },
 
+  // Vlastnosti komponenty
   props: {
+    // Typ média (anime/manga)
     type: {
       type: String as () => 'anime' | 'manga',
       required: true,
     },
+    // Voliteľný vlastný nadpis
     title: {
       type: String,
       default: undefined,

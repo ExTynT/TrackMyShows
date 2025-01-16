@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { supabase } from '@/lib/supabase'
 import type { Manga, UserMangaStatus, UserMangaListItem, MangaStatus } from '@/types/manga'
 
+// Rozhranie pre prepojenie mangy a žánrov
 interface MangaGenreRelation {
   manga_id: number
   manga_genres: {
@@ -11,6 +12,7 @@ interface MangaGenreRelation {
   }
 }
 
+// Rozhranie pre prepojenie mangy a autorov
 interface MangaAuthorRelation {
   manga_id: number
   manga_authors: {
@@ -23,6 +25,7 @@ interface MangaAuthorRelation {
   }
 }
 
+// Rozhranie pre nespracované dáta mangy z databázy
 interface RawMangaData {
   id: number
   title: string
@@ -43,13 +46,16 @@ interface RawMangaData {
   manga_characters?: Manga['characters']
 }
 
+// Store pre správu mangy
 export const useMangaStore = defineStore('manga', () => {
+  // Stavové premenné
   const mangaList = ref<Manga[]>([])
   const currentManga = ref<Manga | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
   const userMangaList = ref<UserMangaListItem[]>([])
 
+  // Načítanie zoznamu všetkých máng
   async function fetchMangaList() {
     try {
       loading.value = true
@@ -120,6 +126,7 @@ export const useMangaStore = defineStore('manga', () => {
     }
   }
 
+  // Načítanie detailu konkrétnej mangy
   async function fetchMangaDetail(id: number) {
     try {
       loading.value = true
@@ -167,6 +174,7 @@ export const useMangaStore = defineStore('manga', () => {
     }
   }
 
+  // Načítanie zoznamu máng používateľa
   async function fetchUserMangaList(userId: string) {
     try {
       const { data, error: err } = await supabase
@@ -187,6 +195,7 @@ export const useMangaStore = defineStore('manga', () => {
     }
   }
 
+  // Aktualizácia stavu čítania mangy používateľom
   async function updateUserMangaStatus(
     mangaId: number,
     status: UserMangaStatus,
@@ -214,6 +223,7 @@ export const useMangaStore = defineStore('manga', () => {
     }
   }
 
+  // Export stavových premenných a funkcií
   return {
     mangaList,
     currentManga,

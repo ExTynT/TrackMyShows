@@ -1,13 +1,17 @@
+<!-- Hlavná sekcia pre blogy a recenzie -->
 <template>
   <section class="blogs-section">
     <h2 class="section-title">Blogs and Reviews</h2>
+    <!-- Načítavací indikátor -->
     <v-progress-circular
       v-if="loading"
       indeterminate
       color="primary"
       class="loader"
     ></v-progress-circular>
+    <!-- Mriežka s blogmi a recenziami -->
     <div v-else class="blogs-grid">
+      <!-- Karta pre blog -->
       <v-card
         v-for="blog in blogs"
         :key="blog.id"
@@ -28,6 +32,7 @@
         </div>
       </v-card>
 
+      <!-- Karta pre recenziu -->
       <v-card
         v-for="review in reviews"
         :key="review.id"
@@ -53,6 +58,7 @@
 </template>
 
 <script lang="ts">
+// Importy potrebných závislostí
 import { defineComponent } from 'vue'
 import { useBlogStore } from '@/stores/blog'
 import type { Blog } from '@/types/blog'
@@ -60,6 +66,7 @@ import type { Blog } from '@/types/blog'
 export default defineComponent({
   name: 'BlogsAndReviews',
 
+  // Základný stav komponentu
   data() {
     const store = useBlogStore()
     return {
@@ -71,6 +78,7 @@ export default defineComponent({
   },
 
   methods: {
+    // Formátovanie dátumu do čitateľnej podoby
     formatDate(dateString: string): string {
       const options: Intl.DateTimeFormatOptions = {
         year: 'numeric',
@@ -80,6 +88,7 @@ export default defineComponent({
       return new Date(dateString).toLocaleDateString('en-US', options)
     },
 
+    // Načítanie blogov a recenzií
     async fetchData() {
       this.loading = true
       try {
@@ -94,6 +103,7 @@ export default defineComponent({
     },
   },
 
+  // Načítanie dát pri vytvorení komponentu
   mounted() {
     this.fetchData()
   },

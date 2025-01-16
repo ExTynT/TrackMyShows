@@ -1,19 +1,28 @@
+<!-- Hlavná sekcia pre carousel -->
 <template>
   <section class="carousel-section">
+    <!-- Načítavací indikátor -->
     <v-progress-circular
       v-if="loading"
       indeterminate
       color="primary"
       class="loader"
     ></v-progress-circular>
+    <!-- Carousel s automatickým prehrávaním -->
     <v-carousel v-else cycle height="400" hide-delimiter-background show-arrows="hover">
-      <v-carousel-item v-for="slide in slides" :key="slide.id" :src="slide.image_url" cover>
+      <!-- Jednotlivé slidy v carouseli -->
+      <v-carousel-item
+        v-for="slide in slides"
+        :key="slide.id"
+        :src="slide.image_url"
+        cover
+        :to="slide.type === 'anime' ? `/anime/${slide.content_id}` : slide.link"
+        style="cursor: pointer"
+      >
+        <!-- Obsah slidu -->
         <div class="carousel-content">
           <h2 class="carousel-title">{{ slide.title }}</h2>
           <p class="carousel-description">{{ slide.description }}</p>
-          <v-btn color="primary" variant="flat">
-            {{ slide.button_text }}
-          </v-btn>
         </div>
       </v-carousel-item>
     </v-carousel>
@@ -28,6 +37,7 @@ import type { HomeCarouselSlide } from '@/types/carousel'
 export default defineComponent({
   name: 'HeroCarousel',
 
+  // Základný stav komponentu
   data() {
     const store = useCarouselStore()
     return {
@@ -38,6 +48,7 @@ export default defineComponent({
   },
 
   methods: {
+    // Načítanie slidov z databázy
     async fetchData() {
       this.loading = true
       try {
@@ -51,6 +62,7 @@ export default defineComponent({
     },
   },
 
+  // Načítanie dát pri vytvorení komponentu
   mounted() {
     this.fetchData()
   },
@@ -97,24 +109,6 @@ export default defineComponent({
   line-height: 1.6;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
   opacity: 0.9;
-}
-
-.v-btn {
-  text-transform: none;
-  font-size: 16px;
-  font-weight: 600;
-  padding: 0 24px;
-  height: 44px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.v-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {

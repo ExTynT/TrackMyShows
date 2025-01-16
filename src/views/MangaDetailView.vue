@@ -1,9 +1,10 @@
 <template>
+  <!-- Načítavací stav -->
   <div v-if="loading" class="d-flex justify-center align-center" style="min-height: 400px">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
   </div>
   <div v-else-if="mappedManga" class="manga-detail">
-    <!-- Hero Section -->
+    <!-- Hlavička s obrázkom a základnými informáciami -->
     <media-detail-hero
       type="manga"
       :media="mappedManga"
@@ -17,9 +18,9 @@
 
     <v-container class="py-8">
       <v-row>
-        <!-- Main Content -->
+        <!-- Hlavná sekcia -->
         <v-col cols="12" md="8">
-          <!-- Details -->
+          <!-- Detailné informácie o mange -->
           <media-detail-info
             type="manga"
             :media="mappedManga"
@@ -31,7 +32,7 @@
             "
           />
 
-          <!-- Characters -->
+          <!-- Zoznam postáv -->
           <media-detail-characters
             :characters="
               mangaStore.currentManga?.characters?.map((char) => ({
@@ -45,9 +46,9 @@
           />
         </v-col>
 
-        <!-- Sidebar -->
+        <!-- Bočný panel -->
         <v-col cols="12" md="4">
-          <!-- User Progress -->
+          <!-- Čitateľský progress používateľa -->
           <media-detail-progress
             type="manga"
             v-model="progressModel"
@@ -56,12 +57,13 @@
             @update="updateProgress"
           />
 
-          <!-- Similar Manga -->
+          <!-- Podobná manga -->
           <media-detail-similar type="manga" :items="similarManga" />
         </v-col>
       </v-row>
     </v-container>
   </div>
+  <!-- Chybový stav - manga nenájdená -->
   <div v-else class="d-flex justify-center align-center" style="min-height: 400px">
     <div class="text-center">
       <v-icon size="64" color="grey" class="mb-4">mdi-alert</v-icon>
@@ -85,6 +87,7 @@ import MediaDetailSimilar from '@/components/media-detail/MediaDetailSimilar.vue
 export default defineComponent({
   name: 'MangaDetailView',
 
+  // Registrácia komponentov
   components: {
     MediaDetailHero,
     MediaDetailInfo,
@@ -93,6 +96,7 @@ export default defineComponent({
     MediaDetailSimilar,
   },
 
+  // Základný stav komponenty
   data() {
     const store = useMangaStore()
     return {
@@ -108,6 +112,7 @@ export default defineComponent({
   },
 
   computed: {
+    // Mapovanie dát mangy pre zobrazenie
     mappedManga(): Media | null {
       if (!this.mangaStore.currentManga) return null
 
@@ -131,6 +136,7 @@ export default defineComponent({
       }
     },
 
+    // Výber podobnej mangy podľa žánrov
     similarManga(): MediaItem[] {
       if (!this.mangaStore.currentManga) return []
 
@@ -154,6 +160,7 @@ export default defineComponent({
   },
 
   methods: {
+    // Inicializácia detailu mangy a načítanie používateľského progressu
     async initialize() {
       this.loading = true
       try {
@@ -175,6 +182,7 @@ export default defineComponent({
       }
     },
 
+    // Aktualizácia používateľského progressu
     async updateProgress() {
       this.updating = true
       try {
@@ -191,10 +199,12 @@ export default defineComponent({
     },
   },
 
+  // Spustenie inicializácie pri vytvorení komponenty
   mounted() {
     this.initialize()
   },
 
+  // Sledovanie zmeny ID v URL a reinicializácia
   watch: {
     'route.params.id': {
       handler: 'initialize',

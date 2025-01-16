@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { supabase } from '@/lib/supabase'
 
+// Rozhranie pre slide v karuseli
 interface CarouselSlide {
   id: number
   title: string
@@ -8,16 +9,22 @@ interface CarouselSlide {
   button_text: string
   image_url: string
   order_index: number
+  type: 'anime' | 'manga' | 'other'
+  content_id?: number
+  link?: string
 }
 
 export const useCarouselStore = defineStore('carousel', {
+  // Stavové premenné
   state: () => ({
     slides: [] as CarouselSlide[],
     loading: false,
     error: null as string | null,
   }),
 
+  // Akcie pre prácu s databázou
   actions: {
+    // Načítanie všetkých slidov
     async fetchSlides() {
       this.loading = true
       try {
@@ -37,6 +44,7 @@ export const useCarouselStore = defineStore('carousel', {
       }
     },
 
+    // Pridanie nového slidu
     async addSlide(slide: Omit<CarouselSlide, 'id'>) {
       try {
         const { data, error } = await supabase
@@ -53,6 +61,7 @@ export const useCarouselStore = defineStore('carousel', {
       }
     },
 
+    // Aktualizácia existujúceho slidu
     async updateSlide(id: number, updates: Partial<CarouselSlide>) {
       try {
         const { data, error } = await supabase
@@ -73,6 +82,7 @@ export const useCarouselStore = defineStore('carousel', {
       }
     },
 
+    // Odstránenie slidu
     async removeSlide(id: number) {
       try {
         const { error } = await supabase.from('carousel_slides').delete().eq('id', id)

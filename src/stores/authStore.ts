@@ -57,7 +57,7 @@ export const useAuthStore = defineStore('auth', () => {
       if (err) throw err
 
       if (data.user) {
-        // Create user profile
+        // Vytvorenie profilu používateľa
         const { error: profileError } = await supabase.from('user_profiles').insert({
           id: data.user.id,
           username,

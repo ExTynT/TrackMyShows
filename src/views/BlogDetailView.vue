@@ -1,7 +1,7 @@
 <template>
   <div class="blog-detail">
     <v-container>
-      <!-- Loading State -->
+      <!-- Načítavací stav -->
       <div
         v-if="blogStore.loading"
         class="d-flex justify-center align-center"
@@ -10,26 +10,27 @@
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
       </div>
 
-      <!-- Error State -->
+      <!-- Chybový stav -->
       <blog-error
         v-else-if="blogStore.error"
         :message="blogStore.error"
         description="There was an error loading the blog post. Please try again later."
       />
 
-      <!-- Content -->
+      <!-- Obsah blogu -->
       <template v-else-if="blogStore.currentPost">
         <blog-breadcrumbs :blog-title="blogStore.currentPost.title" />
         <blog-content :blog="blogStore.currentPost" />
       </template>
 
-      <!-- Not Found -->
+      <!-- Blog nenájdený -->
       <blog-error v-else />
     </v-container>
   </div>
 </template>
 
 <script lang="ts">
+// Importy komponentov a závislostí
 import { defineComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useBlogStore } from '@/stores/blog'
@@ -46,6 +47,7 @@ export default defineComponent({
     BlogError,
   },
 
+  // Základný stav komponentu
   data() {
     return {
       route: useRoute(),
@@ -53,6 +55,7 @@ export default defineComponent({
     }
   },
 
+  // Načítanie detailu blogu pri zobrazení
   async mounted() {
     const id = parseInt(this.route.params.id as string)
     await this.blogStore.fetchPostDetail(id)
